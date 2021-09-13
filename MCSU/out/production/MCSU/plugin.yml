@@ -1,0 +1,99 @@
+name: MCSU
+version: 1.0.0
+author: Cloud
+main: com.cloud.mcsu.MCSU
+api-version: 1.14
+commands:
+  spawn:
+    description: Sets the world spawn for the server.
+    usage: </command>
+  trophy:
+    description: Gives a player the trophy.
+    usage: </command>
+  beeriding:
+    description: Bee Riding.
+    usage: </command>
+  sg:
+    description: Starts survival games.
+    usage: </command>
+  heal:
+    description: Heals the player.
+    usage: </command>
+  hub:
+    description: Teleports the player to the hub.
+    usage: </command>
+  stopsg:
+    description: Stops sg.
+    usage: </command>
+  gui:
+    description: Opens the MCSU GUI.
+    usage: </command>
+  skybattle:
+    description: Starts skybattle.
+    usage: </command>
+  stopskybattle:
+    description: Stops skybattle.
+    usage: </command>
+  resetworld:
+    description: Resets the world.
+    usage: </command>
+  mcsuteam:
+    description: MCSU team command.
+    usage: </command>
+  horserace:
+    description: Starts the horse race.
+    usage: </command>
+  v:
+    description: Invis command.
+    usage: </command>
+  buildingmap:
+    description: Sets the world back to the building map.
+    usage: </command>
+  ctf:
+    description: Starts capture the flag.
+    usage: </command>
+  stopctf:
+    description: Stops capture the flag.
+    usage: </command>
+  roll:
+    description: Rolls the dice.
+    usage: </command>
+  slimekour:
+    description: Starts slimekour.
+    usage: </command>
+  stopslimekour:
+    description: Stops slimekour.
+    usage: </command>
+  hideandseek:
+    description: Starts Hide and Seek.
+    usage: </command>
+  stophideandseek:
+    description: Stops Hide and Seek.
+    usage: </command>
+  taco:
+    description: Gives the player a taco.
+    usage: </command>
+  timer:
+    description: Timer.
+    usage: </command>
+  cosmetic:
+    description: Cosmetic
+    usage: </command>
+  gangbeasts:
+    description: Starts gangbeasts.
+    usage: </command>
+  stopgangbeasts:
+    description: Stops gangbeasts.
+    usage: </command>
+  ace:
+    description: Gives player ace rank.
+    usage: </command>
+  event:
+    description: Starts MCSU event.
+    usage: </command>
+  resetpoints:
+    description: Resets the points.
+    usage: </command
+  nick:
+    description: Nick a player.
+    usage: </command>

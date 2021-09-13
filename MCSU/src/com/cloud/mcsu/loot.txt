@@ -1,0 +1,16 @@
+diamond boots feather falling 2
+diamond leggings unbreaking 1
+iron boots depth sprider 3
+iron leggings thorns 1
+iron chestplate prot 1
+iron helmet aqua afinnity
+gold chestplate prot 1
+gold helmet respiration 3
+bow punch 1
+poison pots 1
+regen pots 2
+gapples 1
+diamond sword sweeping edge 2
+gold axe unbreaking 5
+iron sword fire aspect 1
+wooden sword kb 5
