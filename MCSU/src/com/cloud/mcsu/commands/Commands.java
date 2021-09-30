@@ -2,6 +2,7 @@ package com.cloud.mcsu.commands;
 
 import com.cloud.mcsu.MCSU;
 import com.cloud.mcsu.config.Config;
+import com.cloud.mcsu.event.Event;
 import com.cloud.mcsu.gui.GUI;
 import com.cloud.mcsu.items.Items;
 import com.cloud.mcsu.worldreset.WorldManager;
@@ -26,6 +27,8 @@ public class Commands implements CommandExecutor {
     public static Player player;
     public static MCSU mcsu = MCSU.getPlugin(MCSU.class);
     public static int current = 0;
+    public static int winnertime = 0;
+    public static int taskID = 0;
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -52,6 +55,53 @@ public class Commands implements CommandExecutor {
             Config.get().set("Points.GreyPoints","0");
             Config.get().set("Points.WhitePoints","0");
             MCSU.getPoints();
+        }
+        if(cmd.getName().equalsIgnoreCase("winner") && player.isOp()) {
+            if(args.length >= 3) {
+                player.getWorld().setTime(15000);
+                winnertime = 0;
+                String first = args[0];
+                String second = args[1];
+                String third = args[2];
+                for(Player players : Bukkit.getOnlinePlayers()) {
+                    players.getInventory().clear();
+                }
+                taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(mcsu, new Runnable() {
+                    @Override
+                    public void run() {
+                        for(Player players : Bukkit.getOnlinePlayers()) {
+                            players.sendTitle(player.getScoreboard().getTeam(first).getColor()+player.getScoreboard().getTeam(first).getDisplayName()+" win MCSU!",player.getScoreboard().getTeam(second).getColor()+"2. "+player.getScoreboard().getTeam(second).getDisplayName()+player.getScoreboard().getTeam(third).getColor()+" 3. "+player.getScoreboard().getTeam(third).getDisplayName(),0,100,0);
+                        }
+                        winnertime = winnertime + 5;
+                        Location loc1 = new Location(player.getWorld(),-73.5,23,155.5);
+                        Event.spawnFireworks(loc1,1,Color.AQUA);
+                        Event.spawnFireworks(loc1,1,Color.WHITE);
+                        Location loc2 = new Location(player.getWorld(),-67.5,23,156);
+                        Event.spawnFireworks(loc2,1,Color.YELLOW);
+                        Event.spawnFireworks(loc2,1,Color.WHITE);
+                        Location loc3 = new Location(player.getWorld(),-80.5,23,156);
+                        Event.spawnFireworks(loc3,1,Color.SILVER);
+                        Event.spawnFireworks(loc3,1,Color.WHITE);
+                        if(winnertime == 200) {
+                            for(Player players : Bukkit.getOnlinePlayers()) {
+                                players.teleport(new Location(player.getWorld(), MCSU.spawnx, MCSU.spawny, MCSU.spawnz, -180, 0));
+                                players.sendTitle(ChatColor.AQUA+"MCSU Finished!",ChatColor.GRAY+"Thanks for playing!");
+                            }
+                            Bukkit.getScheduler().cancelTask(taskID);
+                        }
+                    }
+                }, 0L,20L);
+                for(String t : player.getScoreboard().getTeam(first).getEntries()) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"give "+t+" minecraft:player_head{display:{Name:\"{\\\"text\\\":\\\"Trophy\\\",\\\"italic\\\":\\\"false\\\"}\"},SkullOwner:{Id:[I;1828030356,-434813918,-1290808784,506757473],Properties:{textures:[{Value:\"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==\"}]}}} 1");
+                    Bukkit.getPlayer(t).teleport(new Location(player.getWorld(),-73.5,12.5,155.5));
+                }
+                for(String t : player.getScoreboard().getTeam(second).getEntries()) {
+                    Bukkit.getPlayer(t).teleport(new Location(player.getWorld(),-73.5,17.5,155.5));
+                }
+                for(String t : player.getScoreboard().getTeam(third).getEntries()) {
+                    Bukkit.getPlayer(t).teleport(new Location(player.getWorld(),-77,16.5,155.5));
+                }
+            }
         }
         if(cmd.getName().equalsIgnoreCase("sb") && player.isOp()) {
             for(Player players : Bukkit.getOnlinePlayers()) {

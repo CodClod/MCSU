@@ -1,6 +1,7 @@
 package com.cloud.mcsu.minigames;
 
 import com.cloud.mcsu.MCSU;
+import com.cloud.mcsu.announcements.Announcement;
 import com.cloud.mcsu.config.Config;
 import com.cloud.mcsu.worldreset.WorldManager;
 import org.bukkit.*;
@@ -8,7 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -19,6 +20,9 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.Team;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class Skybattle implements CommandExecutor, Listener {
 
@@ -30,6 +34,10 @@ public class Skybattle implements CommandExecutor, Listener {
     public static double borderY;
     public static boolean skybattleStarted;
     public static boolean borderStarted = false;
+    public static ArrayList<Player> deadplayers = new ArrayList<Player>();
+    public static ArrayList<String> deadteams = new ArrayList<String>();
+    public static ArrayList<String> onlineteams = new ArrayList<String>();
+    public static HashMap<String, Integer> onlineteamplayers = new HashMap<String, Integer>();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -48,8 +56,26 @@ public class Skybattle implements CommandExecutor, Listener {
     }
 
     public static void skybattleCommand(Player p) {
-        player = p;
         world = player.getWorld();
+        List<Entity> entList = world.getEntities();//get all entities in the world
+        for(Entity current : entList) {//loop through the list
+            if (current instanceof Item) {//make sure we aren't deleting mobs/players
+                current.remove();//remove it
+            }
+            if (current instanceof Skeleton) {
+                current.remove();
+            }
+            if (current instanceof Zombie) {
+                current.remove();
+            }
+            if (current instanceof Creeper) {
+                current.remove();
+            }
+            if (current instanceof Arrow) {
+                current.remove();
+            }
+        }
+        player = p;
         if(Bukkit.getScheduler().isCurrentlyRunning(taskID)) {
             stopTimer();
         }
@@ -63,13 +89,35 @@ public class Skybattle implements CommandExecutor, Listener {
         borderY = 120;
         setTimer(15);
         startTimer();
+        deadplayers = null;
+        deadplayers = new ArrayList<Player>();
+        deadteams = null;
+        deadteams = new ArrayList<String>();
+        onlineteams = null;
+        onlineteams = new ArrayList<String>();
+        onlineteamplayers = null;
+        onlineteamplayers = new HashMap<String, Integer>();
+        onlineteamplayers.put("Blue",0);
+        onlineteamplayers.put("Red",0);
+        onlineteamplayers.put("Yellow",0);
+        onlineteamplayers.put("Green",0);
+        onlineteamplayers.put("Aqua",0);
+        onlineteamplayers.put("Pink",0);
+        onlineteamplayers.put("Grey",0);
+        onlineteamplayers.put("White",0);
     }
 
     public static void stopSkybattle() {
+        for (Player players : Bukkit.getOnlinePlayers()) {
+            players.setInvulnerable(false);
+        }
         stopTimer();
         borderY = 120;
         skybattleStarted = false;
         world.getWorldBorder().setSize(10000,1);
+        deadteams = null;
+        deadplayers = null;
+        onlineteams = null;
     }
 
     public static void setTimer(int amount) {
@@ -149,6 +197,15 @@ public class Skybattle implements CommandExecutor, Listener {
                             players.removePotionEffect(effect.getType());
                         }
                     }
+                    String[] msgs = {
+                            ChatColor.YELLOW+"Skybattle",
+                            "",
+                            ChatColor.WHITE+"Gather resources from different islands scattered across the map.",
+                            ChatColor.WHITE+"Bridge to different islands using your regenerating blocks and make sure to not fall off!",
+                            ChatColor.WHITE+"PVP other players to secure the victory.",
+                            ChatColor.WHITE+"Good Luck and Have Fun!"
+                    };
+                    new Announcement(msgs);
                 }
                 time = time - 1;
             }
@@ -164,6 +221,7 @@ public class Skybattle implements CommandExecutor, Listener {
         stopTimer();
         skybattleStarted = true;
         for (Player players : Bukkit.getOnlinePlayers()) {
+            players.setInvulnerable(false);
             players.sendTitle("Go!", "", 1, 20, 1);
             players.playSound(players.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1,5);
             players.setGameMode(GameMode.SURVIVAL);
@@ -288,6 +346,109 @@ public class Skybattle implements CommandExecutor, Listener {
                 Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"30"+ChatColor.WHITE+" points!");
                 killer.playSound(killer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                 killer.playSound(killer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
+            }
+        }
+    }
+
+    @EventHandler
+    public static void onDeath(PlayerDeathEvent e) {
+        if(skybattleStarted) {
+            Player deadplayer = e.getEntity();
+            Player killer = e.getEntity().getKiller();
+            Team team = deadplayer.getScoreboard().getPlayerTeam(deadplayer);
+            String teamname = team.getName();
+            int i = 0;
+            deadplayers.add(deadplayer);
+            for(String players : team.getEntries()) {
+                if(Bukkit.getOnlinePlayers().contains(Bukkit.getPlayer(players))) {
+                    onlineteamplayers.put(teamname,onlineteamplayers.get(teamname)+1);
+                }
+                if(deadplayers.contains(Bukkit.getServer().getPlayer(players))) {
+                    i++;
+                }
+            }
+            for(Player players : Bukkit.getOnlinePlayers()) {
+                if(!onlineteams.contains(players.getScoreboard().getPlayerTeam(players).getName())) {
+                    onlineteams.add(players.getScoreboard().getPlayerTeam(players).getName());
+                }
+            }
+            if(i == onlineteamplayers.get(teamname)) {
+                deadteams.add(teamname);
+                for(Player players : Bukkit.getOnlinePlayers()) {
+                    players.sendMessage(players.getScoreboard().getTeam(teamname).getColor()+teamname+ChatColor.WHITE+" has been eliminated.");
+                }
+            }
+            int teamsleftcount = onlineteams.size() - deadteams.size();
+            if (teamsleftcount == 1) {
+                if (!deadteams.contains("Blue") && onlineteams.contains("Blue")) {
+                    Bukkit.broadcastMessage(ChatColor.BLUE + "Blue Bears win Skybattle!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle("§1Blue Bears win Skybattle!", "");
+                    }
+                    int points = MCSU.bluepoints + 150;
+                    Config.get().set("Points.BluePoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("Red") && onlineteams.contains("Red")) {
+                    Bukkit.broadcastMessage(ChatColor.RED + "Red Reindeers win Skybattle!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle("§cRed Reindeers win Skybattle!", "");
+                    }
+                    int points = MCSU.redpoints + 150;
+                    Config.get().set("Points.RedPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("Green") && onlineteams.contains("Green")) {
+                    Bukkit.broadcastMessage(ChatColor.GREEN + "Green Geckos win Skybattle!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle("§aGreen Geckos win Skybattle!", "");
+                    }
+                    int points = MCSU.greenpoints + 150;
+                    Config.get().set("Points.GreenPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("Yellow") && onlineteams.contains("Yellow")) {
+                    Bukkit.broadcastMessage(ChatColor.YELLOW + "Yellow Yetis win Skybattle!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle("§eYellow Yetis win Skybattle!", "");
+                    }
+                    int points = MCSU.yellowpoints + 150;
+                    Config.get().set("Points.YellowPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("Aqua") && onlineteams.contains("Aqua")) {
+                    Bukkit.broadcastMessage(ChatColor.AQUA + "Aqua Axolotols win Skybattle!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle("§bAqua Axolotols win Skybattle!", "");
+                    }
+                    int points = MCSU.aquapoints + 150;
+                    Config.get().set("Points.AquaPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("Pink") && onlineteams.contains("Pink")) {
+                    Bukkit.broadcastMessage(ChatColor.LIGHT_PURPLE + "Pink Pandas win Skybattle!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle("§dPink Pandas win Skybattle!", "");
+                    }
+                    int points = MCSU.pinkpoints + 150;
+                    Config.get().set("Points.PinkPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("Grey") && onlineteams.contains("Grey")) {
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle("§7Grey Gorillas win Skybattle!", "");
+                    }
+                    Bukkit.broadcastMessage(ChatColor.GRAY + "Grey Gorillas win Skybattle!");
+                    int points = MCSU.greypoints + 150;
+                    Config.get().set("Points.GreyPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("White") && onlineteams.contains("White")) {
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle("§fWhite Walruses win Skybattle!", "");
+                    }
+                    Bukkit.broadcastMessage(ChatColor.WHITE + "White Walruses win Skybattle!");
+                    int points = MCSU.whitepoints + 150;
+                    Config.get().set("Points.WhitePoints", Integer.toString(points));
+                    MCSU.getPoints();
+                }
+                for (Player players : Bukkit.getOnlinePlayers()) {
+                    players.setInvulnerable(true);
+                }
+                stopSkybattle();
             }
         }
     }

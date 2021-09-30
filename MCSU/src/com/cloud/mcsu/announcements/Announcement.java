@@ -13,18 +13,23 @@ public class Announcement implements Listener  {
     public static boolean announcementHappening;
 
     public Announcement(String[] msgs) {
-        announcementHappening = true;
+        // announcementHappening = true;
         for(Player players : Bukkit.getOnlinePlayers()) {
-            players.sendMessage(ChatColor.STRIKETHROUGH+"                                       ");
-            players.sendMessage(msgs);
-            players.sendMessage(ChatColor.STRIKETHROUGH+"                                       ");
+            players.sendMessage(ChatColor.STRIKETHROUGH+"                                                            ");
+            for(int i = 0; i < msgs.length; i++) {
+                players.sendMessage(msgs[i]);
+            }
+            players.sendMessage(ChatColor.STRIKETHROUGH+"                                                            ");
         }
     }
 
+    /*
     @EventHandler
     public static void onChatMessage(AsyncPlayerChatEvent e) {
         if(announcementHappening) {
             e.setCancelled(false);
         }
     }
+
+     */
 }

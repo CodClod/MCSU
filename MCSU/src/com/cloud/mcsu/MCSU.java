@@ -49,40 +49,49 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
     public static HashMap<Integer,String> placement = new HashMap<Integer,String>();
     public static HashMap<String, Integer> placements = new HashMap<String, Integer>();
     public static Player teamplayer;
+    public static int onlineplayers;
 
     @Override
     public void onEnable() {
-        getCommand("spawn").setExecutor(new Commands());
-        getCommand("trophy").setExecutor(new Commands());
-        getCommand("beeriding").setExecutor(new Commands());
-        getCommand("cosmetic").setExecutor(new Commands());
-        getCommand("heal").setExecutor(new Commands());
-        getCommand("hub").setExecutor(new Commands());
-        getCommand("gui").setExecutor(new Commands());
+        SG.sgStarted = false;
+        Skybattle.skybattleStarted = false;
+        Slimekour.slimekourStarted = false;
+        GangBeasts.gangbeastsStarted = false;
+        HorseRace.horseraceStarted = false;
+        //getCommand("spawn").setExecutor(new Commands());
+        //getCommand("trophy").setExecutor(new Commands());
+        //getCommand("beeriding").setExecutor(new Commands());
+        //getCommand("cosmetic").setExecutor(new Commands());
+        //getCommand("heal").setExecutor(new Commands());
+        // getCommand("hub").setExecutor(new Commands());
+        //getCommand("gui").setExecutor(new Commands());
         getCommand("sg").setExecutor(new SG());
         getCommand("stopsg").setExecutor(new SG());
         getCommand("skybattle").setExecutor(new Skybattle());
         getCommand("stopskybattle").setExecutor(new Skybattle());
-        getCommand("resetworld").setExecutor(new Commands());
-        getCommand("mcsuteam").setExecutor(new Commands());
+        //getCommand("resetworld").setExecutor(new Commands());
+        //getCommand("mcsuteam").setExecutor(new Commands());
         getCommand("horserace").setExecutor(new HorseRace());
-        getCommand("v").setExecutor(new Commands());
-        getCommand("roll").setExecutor(new Commands());
-        getCommand("buildingmap").setExecutor(new Commands());
+        //getCommand("v").setExecutor(new Commands());
+        //getCommand("roll").setExecutor(new Commands());
+        //getCommand("buildingmap").setExecutor(new Commands());
         getCommand("ctf").setExecutor(new CaptureTheFlag());
         getCommand("slimekour").setExecutor(new Slimekour());
         getCommand("stopslimekour").setExecutor(new Slimekour());
         getCommand("hideandseek").setExecutor(new HideAndSeek());
         getCommand("stophideandseek").setExecutor(new HideAndSeek());
-        getCommand("timer").setExecutor(new HideAndSeek());
-        getCommand("taco").setExecutor(new Commands());
-        getCommand("ace").setExecutor(new Commands());
+        getCommand("battleships").setExecutor(new Battleships());
+        //getCommand("timer").setExecutor(new HideAndSeek());
+        //getCommand("taco").setExecutor(new Commands());
+        //getCommand("ace").setExecutor(new Commands());
         getCommand("gangbeasts").setExecutor(new GangBeasts());
+        getCommand("stophorserace").setExecutor(new HorseRace());
         getCommand("stopgangbeasts").setExecutor(new GangBeasts());
+        getCommand("winner").setExecutor(new Commands());
         getCommand("stopctf").setExecutor(new CaptureTheFlag());
         getCommand("event").setExecutor(new Event());
         getCommand("resetpoints").setExecutor(new Commands());
-        getCommand("nick").setExecutor(new Commands());
+        //getCommand("nick").setExecutor(new Commands());
         getServer().getPluginManager().registerEvents(new Events(), this);
         getServer().getPluginManager().registerEvents(new SG(), this);
         getServer().getPluginManager().registerEvents(new WorldManager(), this);
@@ -203,19 +212,18 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
         board = manager.getNewScoreboard();
         Objective obj = board.registerNewObjective("MCSU","dummy","§a§lMinecraft Sundays");
         obj.setDisplaySlot(DisplaySlot.SIDEBAR);
-        Score online = obj.getScore(ChatColor.AQUA+" Online: "+ChatColor.WHITE+Bukkit.getOnlinePlayers().size());
-        online.setScore(13);
+        onlineplayers = Bukkit.getOnlinePlayers().size();
+        if(currentgame == null) {
+            currentgame = "Nothing Right Now";
+        }
+        Score online = obj.getScore(ChatColor.AQUA+" Online: "+ChatColor.WHITE+onlineplayers);
+        online.setScore(11);
         Score game = obj.getScore(ChatColor.AQUA+" Game: "+ChatColor.WHITE+currentgame);
-        game.setScore(12);
-        Score round = obj.getScore(ChatColor.AQUA+" Round: "+ChatColor.WHITE+gameround);
-        round.setScore(11);
-        timeleft = "06:09";
-        Score timer = obj.getScore(ChatColor.AQUA+" Time Left: "+ChatColor.WHITE+timeleft);
-        timer.setScore(10);
+        game.setScore(10);
         Score line9 = obj.getScore("  ");
         line9.setScore(9);
         Score topblank = obj.getScore(" ");
-        topblank.setScore(14);
+        topblank.setScore(12);
         Score bottomblank = obj.getScore("");
         bottomblank.setScore(0);
         player.setScoreboard(board);
@@ -223,35 +231,35 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
         MCSU.blueteam = MCSU.board.registerNewTeam("Blue");
         MCSU.blueteam.setDisplayName(ChatColor.BLUE+"Blue Bears");
         MCSU.blueteam.setColor(ChatColor.BLUE);
-        MCSU.blueteam.setPrefix(ChatColor.BLUE+"[Blue] ");
+        MCSU.blueteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.BLUE+"[Blue] ");
         MCSU.redteam = MCSU.board.registerNewTeam("Red");
         MCSU.redteam.setDisplayName(ChatColor.RED+"Red Reindeers");
         MCSU.redteam.setColor(ChatColor.RED);
-        MCSU.redteam.setPrefix(ChatColor.RED+"[Red] ");
+        MCSU.redteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.RED+"[Red] ");
         MCSU.greenteam = MCSU.board.registerNewTeam("Green");
         MCSU.greenteam.setDisplayName(ChatColor.GREEN+"Green Gorillas");
         MCSU.greenteam.setColor(ChatColor.GREEN);
-        MCSU.greenteam.setPrefix(ChatColor.GREEN+"[Green] ");
+        MCSU.greenteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.GREEN+"[Green] ");
         MCSU.yellowteam = MCSU.board.registerNewTeam("Yellow");
         MCSU.yellowteam.setDisplayName(ChatColor.YELLOW+"Yellow Yetis");
         MCSU.yellowteam.setColor(ChatColor.YELLOW);
-        MCSU.yellowteam.setPrefix(ChatColor.YELLOW+"[Yellow] ");
+        MCSU.yellowteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.YELLOW+"[Yellow] ");
         MCSU.aquateam = MCSU.board.registerNewTeam("Aqua");
         MCSU.aquateam.setDisplayName(ChatColor.AQUA+"Aqua Axolotols");
         MCSU.aquateam.setColor(ChatColor.AQUA);
-        MCSU.aquateam.setPrefix(ChatColor.AQUA+"[Aqua] ");
+        MCSU.aquateam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.AQUA+"[Aqua] ");
         MCSU.pinkteam = MCSU.board.registerNewTeam("Pink");
         MCSU.pinkteam.setDisplayName(ChatColor.LIGHT_PURPLE+"Pink Pandas");
         MCSU.pinkteam.setColor(ChatColor.LIGHT_PURPLE);
-        MCSU.pinkteam.setPrefix(ChatColor.LIGHT_PURPLE+"[Pink] ");
+        MCSU.pinkteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.LIGHT_PURPLE+"[Pink] ");
         MCSU.greyteam = MCSU.board.registerNewTeam("Grey");
         MCSU.greyteam.setDisplayName(ChatColor.GRAY+"Grey Gorillas");
         MCSU.greyteam.setColor(ChatColor.GRAY);
-        MCSU.greyteam.setPrefix(ChatColor.GRAY+"[Grey] ");
+        MCSU.greyteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.GRAY+"[Grey] ");
         MCSU.whiteteam = MCSU.board.registerNewTeam("White");
         MCSU.whiteteam.setDisplayName(ChatColor.WHITE+"White Walruses");
         MCSU.whiteteam.setColor(ChatColor.WHITE);
-        MCSU.whiteteam.setPrefix(ChatColor.WHITE+"[White] ");
+        MCSU.whiteteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.WHITE+"[White] ");
 
         bluepoints = Integer.parseInt(Config.get().getString("Points.BluePoints"));
         redpoints = Integer.parseInt(Config.get().getString("Points.RedPoints"));
@@ -286,7 +294,6 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
         int i = 0;
         int place = 9;
         for(TeamPlace a: teamplace) { // printing the sorted list of ages
-            player.sendMessage(a.getTeamName() +"  : "+ a.getTeamPoints() + ", ");
             i++;
             place--;
             /*
@@ -338,15 +345,17 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
         MCSU.greenteam.addEntry("WaitWhosCandice");
         MCSU.aquateam.addEntry("axob");
         MCSU.blueteam.addEntry("AceyXS");
-        MCSU.yellowteam.addEntry("robux_");
-        MCSU.aquateam.addEntry("PogGamer");
+        MCSU.yellowteam.addEntry("FortniteFloppers");
+        MCSU.redteam.addEntry("FishGamer33");
         MCSU.greyteam.addEntry("Anonymous1252");
         MCSU.blueteam.addEntry("tunae");
-        MCSU.whiteteam.addEntry("stanowar");
+        MCSU.yellowteam.addEntry("stanowar");
         MCSU.greenteam.addEntry("leaef");
-        MCSU.redteam.addEntry("JackyWackers");
+        MCSU.greyteam.addEntry("JackyWackers");
         MCSU.aquateam.addEntry("happygamer1977");
         MCSU.pinkteam.addEntry("CakeIsTasty");
+        MCSU.blueteam.addEntry("SloughyQuasar");
+        MCSU.whiteteam.addEntry("fireball123bro");
 
         if(HideAndSeek.hideandseekStarted) {
             if(HideAndSeek.round == 1) {

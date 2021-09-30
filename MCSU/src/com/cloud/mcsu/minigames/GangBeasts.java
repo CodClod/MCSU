@@ -1,6 +1,7 @@
 package com.cloud.mcsu.minigames;
 
 import com.cloud.mcsu.MCSU;
+import com.cloud.mcsu.announcements.Announcement;
 import com.cloud.mcsu.config.Config;
 import com.cloud.mcsu.event.Event;
 import com.cloud.mcsu.worldreset.WorldManager;
@@ -9,13 +10,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
@@ -30,9 +30,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.Team;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 public class GangBeasts implements CommandExecutor, Listener {
 
@@ -57,6 +55,10 @@ public class GangBeasts implements CommandExecutor, Listener {
             "White"
     };
     public static int[] a;
+    public static ArrayList<Player> deadplayers = new ArrayList<Player>();
+    public static ArrayList<String> deadteams = new ArrayList<String>();
+    public static ArrayList<String> onlineteams = new ArrayList<String>();
+    public static HashMap<String, Integer> onlineteamplayers = new HashMap<String, Integer>();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -65,33 +67,71 @@ public class GangBeasts implements CommandExecutor, Listener {
             return true;
         }
         player = (Player) sender;
-        if (cmd.getName().equalsIgnoreCase("gangbeasts")) {
-            gangbeastsCommand(player);
+        if (cmd.getName().equalsIgnoreCase("gangbeasts") && player.isOp()) {
+            if(args.length >= 1) {
+                int currentround = Integer.parseInt(args[0]);
+                gangbeastsCommand(player,currentround);
+            }
         }
-        if (cmd.getName().equalsIgnoreCase("stopgangbeasts")) {
+        if (cmd.getName().equalsIgnoreCase("stopgangbeasts") && player.isOp()) {
             stopGangbeasts();
         }
         return true;
     }
 
-    public static void gangbeastsCommand(Player p) {
+    public static void gangbeastsCommand(Player p, int r) {
+        world = p.getWorld();
+        List<Entity> entList = world.getEntities();//get all entities in the world
+        for(Entity current : entList) {//loop through the list
+            if (current instanceof Item) {//make sure we aren't deleting mobs/players
+                current.remove();//remove it
+            }
+            if (current instanceof Creeper) {//make sure we aren't deleting mobs/players
+                current.remove();//remove it
+            }
+            if (current instanceof Skeleton) {//make sure we aren't deleting mobs/players
+                current.remove();//remove it
+            }
+            if (current instanceof Arrow) {//make sure we aren't deleting mobs/players
+                current.remove();//remove it
+            }
+        }
+        for(Player players : Bukkit.getOnlinePlayers()) {
+            players.setInvulnerable(false);
+        }
         stopwatchtime = 0;
         stopTimer();
         stopstopwatch();
-        round = 1;
         gangbeastsStarted = false;
         if (Bukkit.getScheduler().isCurrentlyRunning(taskID)) {
             stopTimer();
         }
+        round = r;
         player = p;
-        world = p.getWorld();
         setTimer(15);
         startTimer();
+        deadplayers = null;
+        deadplayers = new ArrayList<Player>();
+        deadteams = null;
+        deadteams = new ArrayList<String>();
+        onlineteams = null;
+        onlineteams = new ArrayList<String>();
+        onlineteamplayers = null;
+        onlineteamplayers = new HashMap<String, Integer>();
+        onlineteamplayers.put("Blue",0);
+        onlineteamplayers.put("Red",0);
+        onlineteamplayers.put("Yellow",0);
+        onlineteamplayers.put("Green",0);
+        onlineteamplayers.put("Aqua",0);
+        onlineteamplayers.put("Pink",0);
+        onlineteamplayers.put("Grey",0);
+        onlineteamplayers.put("White",0);
     }
 
     public static void stopGangbeasts() {
         for (Player players : Bukkit.getOnlinePlayers()) {
             players.setGlowing(false);
+            players.setInvulnerable(false);
         }
         gangbeastsStarted = false;
         stopwatchtime = 0;
@@ -162,6 +202,14 @@ public class GangBeasts implements CommandExecutor, Listener {
                             player.removePotionEffect(effect.getType());
                         }
                     }
+                    String[] msgs = {
+                            ChatColor.LIGHT_PURPLE+"Gang Beasts",
+                            "",
+                            ChatColor.WHITE+"Knock players off the map and get powerups that spawn on the beacons",
+                            ChatColor.WHITE+"to gear yourself up to win.",
+                            ChatColor.WHITE+"Good Luck and Have Fun!"
+                    };
+                    new Announcement(msgs);
                 }
                 time = time - 1;
             }
@@ -199,66 +247,14 @@ public class GangBeasts implements CommandExecutor, Listener {
                         players.sendMessage(ChatColor.GREEN + "Powerups have spawned!");
                     }
                 } else if (stopwatchtime == 120) {
-                    round = round + 1;
-                    if(round == 1) {
-                        stopwatchtime = 0;
-                        gangbeastsStarted = false;
-                        stopstopwatch();
-                        stopTimer();
-                        setTimer(15);
-                        startTimer();
-                        for (Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendMessage(ChatColor.RED + "Round 1 Over!");
-                            players.sendMessage(ChatColor.DARK_RED + "Round 2 Starting..");
-                        }
-                    } else if(round == 2) {
-                        stopwatchtime = 0;
-                        gangbeastsStarted = false;
-                        stopstopwatch();
-                        stopTimer();
-                        setTimer(15);
-                        startTimer();
-                        for (Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendMessage(ChatColor.RED + "Round 2 Over!");
-                            players.sendMessage(ChatColor.DARK_RED + "Round 3 Starting..");
-                        }
-                    } else if(round == 3) {
-                        stopwatchtime = 0;
-                        gangbeastsStarted = false;
-                        stopstopwatch();
-                        stopTimer();
-                        setTimer(15);
-                        startTimer();
-                        for (Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendMessage(ChatColor.RED + "Round 3 Over!");
-                            players.sendMessage(ChatColor.DARK_RED + "Round 4 Starting..");
-                        }
-                    } else if(round == 4) {
-                        stopwatchtime = 0;
-                        gangbeastsStarted = false;
-                        stopstopwatch();
-                        stopTimer();
-                        setTimer(15);
-                        startTimer();
-                        for (Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendMessage(ChatColor.RED + "Round 4 Over!");
-                            players.sendMessage(ChatColor.DARK_RED + "Round 5 Starting..");
-                        }
-                    } else if(round == 5) {
-                        stopwatchtime = 0;
-                        gangbeastsStarted = false;
-                        stopstopwatch();
-                        stopTimer();
-                        setTimer(15);
-                        startTimer();
-                        for (Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendMessage(ChatColor.RED + "Round 5 Over!");
-                            players.sendMessage(ChatColor.DARK_RED + "Game Over!");
-                        }
+                    stopGangbeasts();
+                    for (Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle(ChatColor.AQUA+"Game Over!","");
                     }
                 } else if(stopwatchtime == 60) {
                     for(Player players : Bukkit.getOnlinePlayers()) {
                         ItemStack woodswordkb = new ItemStack(Material.WOODEN_SWORD, 1);
+                        woodswordkb.addEnchantment(Enchantment.KNOCKBACK,2);
                         players.getInventory().addItem(woodswordkb);
                         players.getInventory().addItem(new ItemStack(Material.CREEPER_SPAWN_EGG,1));
                         players.getInventory().addItem(new ItemStack(Material.ENDER_PEARL,1));
@@ -287,6 +283,7 @@ public class GangBeasts implements CommandExecutor, Listener {
 
     public static void gangbeastsStart() throws IOException {
         for (Player players : Bukkit.getOnlinePlayers()) {
+            players.setInvulnerable(false);
             players.sendTitle("§d§lFight!", "", 1, 20, 1);
             players.playSound(players.getLocation(), Sound.ENTITY_VILLAGER_WORK_FLETCHER, 1, 1);
         }
@@ -528,5 +525,70 @@ public class GangBeasts implements CommandExecutor, Listener {
         }
     }
 
+    @EventHandler
+    public static void onDeath(PlayerDeathEvent e) {
+        if (gangbeastsStarted) {
+            Player deadplayer = e.getEntity();
+            Player killer = e.getEntity().getKiller();
+            Team team = deadplayer.getScoreboard().getPlayerTeam(deadplayer);
+            String teamname = team.getName();
+            int i = 0;
+            deadplayers.add(deadplayer);
+            for (String players : team.getEntries()) {
+                if (Bukkit.getOnlinePlayers().contains(Bukkit.getPlayer(players))) {
+                    onlineteamplayers.put(teamname, onlineteamplayers.get(teamname) + 1);
+                }
+                if (deadplayers.contains(Bukkit.getServer().getPlayer(players))) {
+                    i++;
+                }
+            }
+            for (Player players : Bukkit.getOnlinePlayers()) {
+                if (!onlineteams.contains(players.getScoreboard().getPlayerTeam(players).getName())) {
+                    onlineteams.add(players.getScoreboard().getPlayerTeam(players).getName());
+                }
+            }
+            if (i == onlineteamplayers.get(teamname)) {
+                deadteams.add(teamname);
+                for (Player players : Bukkit.getOnlinePlayers()) {
+                    players.sendMessage(players.getScoreboard().getTeam(teamname).getColor() + teamname + ChatColor.WHITE + " has been eliminated.");
+                }
+            }
+            int teamsleftcount = onlineteams.size() - deadteams.size();
+            int j;
+            if(onlineteams.size() >= 8) {
+                j = 2;
+            } else {
+                j = 1;
+            }
+            if (teamsleftcount == j) {
+                stopGangbeasts();
+                for (Player players : Bukkit.getOnlinePlayers()) {
+                    players.setInvulnerable(true);
+                    players.sendTitle(ChatColor.AQUA+"Game Over!","");
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public static void onBreakBlocks(BlockBreakEvent e) {
+        if(gangbeastsStarted) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public static void onDmg(EntityDamageEvent e) {
+        if(gangbeastsStarted) {
+            if(e.getCause() == EntityDamageEvent.DamageCause.LAVA) {
+                e.setDamage(1000);
+            } else if(e.getCause() == EntityDamageEvent.DamageCause.VOID) {
+                e.setDamage(1000);
+            } else {
+                e.setDamage(0);
+                e.getEntity().setFireTicks(1);
+            }
+        }
+    }
 }
 

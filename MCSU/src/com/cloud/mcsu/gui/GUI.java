@@ -44,7 +44,7 @@ public class GUI implements InventoryHolder, Listener {
                     case DARK_OAK_TRAPDOOR:
                         HideAndSeek.hideandseekCommand(player);
                     case STICK:
-                        GangBeasts.gangbeastsCommand(player);
+                        // GangBeasts.gangbeastsCommand(player);
                 }
             }
         }

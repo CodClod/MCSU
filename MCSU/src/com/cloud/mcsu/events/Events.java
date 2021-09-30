@@ -6,7 +6,7 @@ import com.cloud.mcsu.config.Config;
 import com.cloud.mcsu.event.Event;
 import com.cloud.mcsu.gui.GUI;
 import com.cloud.mcsu.items.Items;
-import com.cloud.mcsu.minigames.SG;
+import com.cloud.mcsu.minigames.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.defaults.ReloadCommand;
@@ -18,6 +18,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
@@ -40,23 +41,64 @@ public class Events implements Listener {
     public static ItemStack gameselector;
 
     @EventHandler
+    public static void onSpaceBootsJump(PlayerMoveEvent e) {
+        Player player = e.getPlayer();
+        if(player.getInventory().getBoots().equals(Items.spaceboots)) {
+            Location l = player.getLocation();
+            l.add(0, -1, 0);
+            Block b = l.getBlock();
+            if(b.getType() != Material.AIR) {
+                player.setVelocity(new Vector(0,1,0));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING,5*20,1,false,false));
+            }
+        }
+    }
+
+    @EventHandler
+    public static void onSpaceBootsDmg(EntityDamageEvent e) {
+        if(e.getEntity() instanceof Player) {
+            Player player = (Player) e.getEntity();
+            if(player.getInventory().getBoots().equals(Items.spaceboots)) {
+                e.setCancelled(true);
+                Location l = player.getLocation();
+                l.add(0, -1, 0);
+                Block b = l.getBlock();
+                if(b.getType() != Material.AIR) {
+                    player.setVelocity(new Vector(0,1,0));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING,5*20,1,false,false));
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public static void onEntityDmg(EntityDamageEvent e) {
+        if(e.getEntity() instanceof Panda) {
+            e.setCancelled(true);
+        }
+        if(e.getEntity() instanceof TropicalFish) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public static void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-        world = player.getWorld();
-        world.setAutoSave(false);
-        // player.setAllowFlight(true);
-        // player.setFlying(true);
         spawn = new Location(world,MCSU.spawnx,MCSU.spawny,MCSU.spawnz,-180,0);
-        // player.teleport(spawn);
-        e.setJoinMessage(ChatColor.BLUE+"Welcome to MCSU "+ChatColor.WHITE+player.getDisplayName()+"!");
-        for(Player players : Bukkit.getOnlinePlayers()) {
-            MCSU.createBoard(players);
+        if(player.getName().equals("Fluubs")) {
+            e.setJoinMessage(ChatColor.BLUE+"Sex man"+ChatColor.WHITE+" is here!");
+            // player.getInventory().setBoots(Items.spaceboots);
+        } else {
+            // player.getInventory().setBoots(Items.spaceboots);
+            world = player.getWorld();
+            // player.setAllowFlight(true);
+            // player.setFlying(true);
+            // player.teleport(spawn);
+            e.setJoinMessage(ChatColor.BLUE+"Welcome to MCSU "+ChatColor.WHITE+player.getDisplayName()+"!");
+            for(Player players : Bukkit.getOnlinePlayers()) {
+                MCSU.createBoard(players);
+            }
         }
-        gameselector = new ItemStack(Material.NETHER_STAR,1);
-        ItemMeta meta = gameselector.getItemMeta();
-        meta.setDisplayName("§b§lGame Selector");
-        gameselector.setItemMeta(meta);
-        player.getInventory().setItem(4,gameselector);
     }
 
     @EventHandler
@@ -91,6 +133,67 @@ public class Events implements Listener {
         e.getEntity().getLastDamageCause();
     }
 
+    public static boolean isPlayerInRegion(Player player, int[] coords1, int[] coords2) {
+
+        Location pLoc = player.getLocation();
+        int[] pCoords = { pLoc.getBlockX(), pLoc.getBlockY(), pLoc.getBlockZ() };
+
+        for(int index = 0; index < pCoords.length; index++) {
+            if(!isNumBetween(pCoords[index], coords1[index], coords2[index])) return false;
+        }
+
+        return true;
+    }
+
+    public static boolean isNumBetween(int targetNum, int min, int max) {
+        if(min > max) {
+            int i = min;
+            min = max;
+            max = i;
+        }
+        return ( (targetNum >= min) && (targetNum <= max) );
+    }
+
+    @EventHandler
+    public static void noHunger(FoodLevelChangeEvent e) {
+        int[] coords1 = {
+                -165,
+                3,
+                120
+        };
+        int[] coords2 = {
+                21,
+                48,
+                273
+        };
+        if(e.getEntity() instanceof Player) {
+            Player player = (Player) e.getEntity();
+            if(isPlayerInRegion(player,coords1,coords2)) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public static void noDmgSpawn(EntityDamageEvent e) {
+        int[] coords1 = {
+                -165,
+                3,
+                120
+        };
+        int[] coords2 = {
+                21,
+                48,
+                273
+        };
+        if(e.getEntity() instanceof Player) {
+            Player player = (Player) e.getEntity();
+            if(isPlayerInRegion(player,coords1,coords2)) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
     @EventHandler
     public static void deathMessages(PlayerDeathEvent e) {
         Player killer = e.getEntity().getKiller();
@@ -117,7 +220,6 @@ public class Events implements Listener {
         }
          */
         e.setDeathMessage(ChatColor.BLUE+deathplayer.getName()+ChatColor.WHITE+deathmsgs[randint]);
-
     }
 
     /*
@@ -135,6 +237,88 @@ public class Events implements Listener {
             MCSU.createBoard(players);
         }
         Player player = e.getPlayer();
+        Team team = player.getScoreboard().getPlayerTeam(player);
+        String teamname = team.getName();
+        if(SG.sgStarted) {
+            player.setGameMode(GameMode.SPECTATOR);
+            SG.deadplayers.add(player);
+            int i = 0;
+            for (String players : team.getEntries()) {
+                if (Bukkit.getOnlinePlayers().contains(Bukkit.getPlayer(players))) {
+                    SG.onlineteamplayers.put(teamname, SG.onlineteamplayers.get(teamname) + 1);
+                }
+                if (SG.deadplayers.contains(Bukkit.getServer().getPlayer(players))) {
+                    i++;
+                }
+            }
+            for (Player players : Bukkit.getOnlinePlayers()) {
+                if (!SG.onlineteams.contains(players.getScoreboard().getPlayerTeam(players).getName())) {
+                    SG.onlineteams.add(players.getScoreboard().getPlayerTeam(players).getName());
+                }
+            }
+            if (i == SG.onlineteamplayers.get(teamname)) {
+                SG.deadteams.add(teamname);
+                for (Player players : Bukkit.getOnlinePlayers()) {
+                    players.sendMessage(players.getScoreboard().getTeam(teamname).getColor() + teamname + ChatColor.WHITE + " has been eliminated.");
+                }
+            }
+        }
+        if(HorseRace.horseraceStarted) {
+            player.setGameMode(GameMode.SPECTATOR);
+            HorseRace.finishers.add(player);
+        }
+        if(Slimekour.slimekourStarted) {
+            player.setGameMode(GameMode.SPECTATOR);
+            Slimekour.finishers.add(player);
+        }
+        if(GangBeasts.gangbeastsStarted) {
+            player.setGameMode(GameMode.SPECTATOR);
+            GangBeasts.deadplayers.add(player);
+            int i = 0;
+            for (String players : team.getEntries()) {
+                if (Bukkit.getOnlinePlayers().contains(Bukkit.getPlayer(players))) {
+                    GangBeasts.onlineteamplayers.put(teamname, GangBeasts.onlineteamplayers.get(teamname) + 1);
+                }
+                if (GangBeasts.deadplayers.contains(Bukkit.getServer().getPlayer(players))) {
+                    i++;
+                }
+            }
+            for (Player players : Bukkit.getOnlinePlayers()) {
+                if (!GangBeasts.onlineteams.contains(players.getScoreboard().getPlayerTeam(players).getName())) {
+                    GangBeasts.onlineteams.add(players.getScoreboard().getPlayerTeam(players).getName());
+                }
+            }
+            if (i == GangBeasts.onlineteamplayers.get(teamname)) {
+                GangBeasts.deadteams.add(teamname);
+                for (Player players : Bukkit.getOnlinePlayers()) {
+                    players.sendMessage(players.getScoreboard().getTeam(teamname).getColor() + teamname + ChatColor.WHITE + " has been eliminated.");
+                }
+            }
+        }
+        if(Skybattle.skybattleStarted) {
+            player.setGameMode(GameMode.SPECTATOR);
+            Skybattle.deadplayers.add(player);
+            int i = 0;
+            for (String players : team.getEntries()) {
+                if (Bukkit.getOnlinePlayers().contains(Bukkit.getPlayer(players))) {
+                    Skybattle.onlineteamplayers.put(teamname, Skybattle.onlineteamplayers.get(teamname) + 1);
+                }
+                if (Skybattle.deadplayers.contains(Bukkit.getServer().getPlayer(players))) {
+                    i++;
+                }
+            }
+            for (Player players : Bukkit.getOnlinePlayers()) {
+                if (!Skybattle.onlineteams.contains(players.getScoreboard().getPlayerTeam(players).getName())) {
+                    Skybattle.onlineteams.add(players.getScoreboard().getPlayerTeam(players).getName());
+                }
+            }
+            if (i == Skybattle.onlineteamplayers.get(teamname)) {
+                Skybattle.deadteams.add(teamname);
+                for (Player players : Bukkit.getOnlinePlayers()) {
+                    players.sendMessage(players.getScoreboard().getTeam(teamname).getColor() + teamname + ChatColor.WHITE + " has been eliminated.");
+                }
+            }
+        }
         e.setQuitMessage(ChatColor.WHITE+player.getDisplayName()+" "+ChatColor.BLUE+"left MCSU.");
     }
 
@@ -155,6 +339,11 @@ public class Events implements Listener {
     public static void onPlayerDeath(PlayerDeathEvent e) {
         Player player = e.getEntity();
         player.setGameMode(GameMode.SPECTATOR);
+        if(player.getLocation().getY() < 0) {
+            player.teleport(new Location(player.getWorld(),player.getLocation().getX(),60,player.getLocation().getZ()));
+        } else {
+            player.teleport(player.getLocation());
+        }
     }
 
     /*
@@ -172,6 +361,7 @@ public class Events implements Listener {
         }
     }
 
+    /*
     @EventHandler
     public static void campfireHeal(EntityDamageEvent e) {
         Player player = (Player) e.getEntity();
@@ -182,6 +372,8 @@ public class Events implements Listener {
             player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,100,2));
         }
     }
+
+     */
 
     @EventHandler
     public void onPlayerJump(PlayerMoveEvent e) {

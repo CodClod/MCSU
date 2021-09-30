@@ -1,6 +1,7 @@
 package com.cloud.mcsu.minigames;
 
 import com.cloud.mcsu.MCSU;
+import com.cloud.mcsu.announcements.Announcement;
 import com.cloud.mcsu.config.Config;
 import com.cloud.mcsu.event.Event;
 import com.cloud.mcsu.worldreset.WorldManager;
@@ -93,6 +94,9 @@ public class Slimekour implements CommandExecutor, Listener {
     }
 
     public static void stopSlimekour() {
+        for (Player players : Bukkit.getOnlinePlayers()) {
+            players.setInvulnerable(false);
+        }
         stopTimer();
         slimekourStarted = false;
         stopstopwatch();
@@ -176,6 +180,15 @@ public class Slimekour implements CommandExecutor, Listener {
                             player.removePotionEffect(effect.getType());
                         }
                     }
+                    String[] msgs = {
+                            ChatColor.GREEN+"Slimekour",
+                            "",
+                            ChatColor.WHITE+"Parkour your way through the map by jumping onto slime blocks. Most jumps will be from the same colour to the same colour.",
+                            ChatColor.WHITE+"Use the arrows on signs to help you and remember to not press spacebar when on a slime block",
+                            ChatColor.WHITE+"or you won't get a powerful jump and also hit people to mess up their jump.",
+                            ChatColor.WHITE+"Good Luck and Have Fun!"
+                    };
+                    new Announcement(msgs);
                 }
                 time = time - 1;
             }
@@ -187,27 +200,29 @@ public class Slimekour implements CommandExecutor, Listener {
         stopwatchtaskID = scheduler.scheduleSyncRepeatingTask((Plugin) mcsu, new Runnable() {
             @Override
             public void run() {
-                stopwatchtime = stopwatchtime + 1;
-                int finish = stopwatchtime / 60;
-                int remainder = stopwatchtime % 60;
-                if(Integer.toString(remainder).length() == 1 && Integer.toString(finish).length() == 1) {
-                    String finishremainder = "0"+remainder;
-                    String finishtime = "0"+finish;
-                    fancytimer = finishtime+":"+finishremainder;
-                } else if(Integer.toString(finish).length() == 1) {
-                    String finishtime = "0"+finish;
-                    fancytimer = finishtime+":"+remainder;
-                } else if(Integer.toString(remainder).length() == 1) {
-                    String finishremainder = "0"+remainder;
-                    fancytimer = finish+":"+finishremainder;
-                } else {
-                    fancytimer = finish+":"+remainder;
-                }
-                for(Player players : Bukkit.getOnlinePlayers()) {
-                    if(!finishers.contains(players)) {
-                        players.spigot().sendMessage(ChatMessageType.ACTION_BAR,new TextComponent("Time: "+fancytimer));
+                if(slimekourStarted) {
+                    stopwatchtime = stopwatchtime + 1;
+                    int finish = stopwatchtime / 60;
+                    int remainder = stopwatchtime % 60;
+                    if(Integer.toString(remainder).length() == 1 && Integer.toString(finish).length() == 1) {
+                        String finishremainder = "0"+remainder;
+                        String finishtime = "0"+finish;
+                        fancytimer = finishtime+":"+finishremainder;
+                    } else if(Integer.toString(finish).length() == 1) {
+                        String finishtime = "0"+finish;
+                        fancytimer = finishtime+":"+remainder;
+                    } else if(Integer.toString(remainder).length() == 1) {
+                        String finishremainder = "0"+remainder;
+                        fancytimer = finish+":"+finishremainder;
                     } else {
-                        players.spigot().sendMessage(ChatMessageType.ACTION_BAR,new TextComponent("Finished Slimekour!"));
+                        fancytimer = finish+":"+remainder;
+                    }
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        if(!finishers.contains(players)) {
+                            players.spigot().sendMessage(ChatMessageType.ACTION_BAR,new TextComponent("Time: "+fancytimer));
+                        } else {
+                            players.spigot().sendMessage(ChatMessageType.ACTION_BAR,new TextComponent("Finished Slimekour!"));
+                        }
                     }
                 }
             }
@@ -286,56 +301,64 @@ public class Slimekour implements CommandExecutor, Listener {
 
     @EventHandler
     public static void endSlimekour(PlayerInteractEvent e) {
-        Player slimekourplayer = e.getPlayer();
-        Team team = slimekourplayer.getScoreboard().getPlayerTeam(slimekourplayer);
-        String teamname = team.getName();
-        if(e.getAction().equals(Action.PHYSICAL)) {
-            if(e.getClickedBlock().getType() == Material.LIGHT_WEIGHTED_PRESSURE_PLATE) {
-                if(!finishers.contains(slimekourplayer)) {
-                    int finish = stopwatchtime / 60;
-                    int remainder = stopwatchtime % 60;
-                    finishers.add(slimekourplayer);
-                    int place = finishers.indexOf(slimekourplayer)+1;
-                    if(teamname.equalsIgnoreCase("Blue")) {
-                        int points = MCSU.bluepoints + placementpoints[place-1];
-                        Config.get().set("Points.BluePoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(teamname.equalsIgnoreCase("Red")) {
-                        int points = MCSU.redpoints + placementpoints[place-1];
-                        Config.get().set("Points.RedPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(teamname.equalsIgnoreCase("Yellow")) {
-                        int points = MCSU.yellowpoints + placementpoints[place-1];
-                        Config.get().set("Points.YellowPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(teamname.equalsIgnoreCase("Green")) {
-                        int points = MCSU.greenpoints + placementpoints[place-1];
-                        Config.get().set("Points.GreenPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(teamname.equalsIgnoreCase("Aqua")) {
-                        int points = MCSU.aquapoints + placementpoints[place-1];
-                        Config.get().set("Points.AquaPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(teamname.equalsIgnoreCase("Pink")) {
-                        int points = MCSU.pinkpoints + placementpoints[place-1];
-                        Config.get().set("Points.PinkPoints",Integer.toString(points));
-                        MCSU.getPoints();
+        if(slimekourStarted) {
+            Player slimekourplayer = e.getPlayer();
+            Team team = slimekourplayer.getScoreboard().getPlayerTeam(slimekourplayer);
+            String teamname = team.getName();
+            if(e.getAction().equals(Action.PHYSICAL)) {
+                if(e.getClickedBlock().getType() == Material.LIGHT_WEIGHTED_PRESSURE_PLATE) {
+                    if(!finishers.contains(slimekourplayer)) {
+                        int finish = stopwatchtime / 60;
+                        int remainder = stopwatchtime % 60;
+                        finishers.add(slimekourplayer);
+                        int place = finishers.indexOf(slimekourplayer)+1;
+                        if(teamname.equalsIgnoreCase("Blue")) {
+                            int points = MCSU.bluepoints + placementpoints[place-1];
+                            Config.get().set("Points.BluePoints",Integer.toString(points));
+                            MCSU.getPoints();
+                        } else if(teamname.equalsIgnoreCase("Red")) {
+                            int points = MCSU.redpoints + placementpoints[place-1];
+                            Config.get().set("Points.RedPoints",Integer.toString(points));
+                            MCSU.getPoints();
+                        } else if(teamname.equalsIgnoreCase("Yellow")) {
+                            int points = MCSU.yellowpoints + placementpoints[place-1];
+                            Config.get().set("Points.YellowPoints",Integer.toString(points));
+                            MCSU.getPoints();
+                        } else if(teamname.equalsIgnoreCase("Green")) {
+                            int points = MCSU.greenpoints + placementpoints[place-1];
+                            Config.get().set("Points.GreenPoints",Integer.toString(points));
+                            MCSU.getPoints();
+                        } else if(teamname.equalsIgnoreCase("Aqua")) {
+                            int points = MCSU.aquapoints + placementpoints[place-1];
+                            Config.get().set("Points.AquaPoints",Integer.toString(points));
+                            MCSU.getPoints();
+                        } else if(teamname.equalsIgnoreCase("Pink")) {
+                            int points = MCSU.pinkpoints + placementpoints[place-1];
+                            Config.get().set("Points.PinkPoints",Integer.toString(points));
+                            MCSU.getPoints();
 
-                    } else if(teamname.equalsIgnoreCase("Grey")) {
-                        int points = MCSU.greypoints + placementpoints[place-1];
-                        Config.get().set("Points.GreyPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(teamname.equalsIgnoreCase("White")) {
-                        int points = MCSU.whitepoints + placementpoints[place-1];
-                        Config.get().set("Points.WhitePoints",Integer.toString(points));
-                        MCSU.getPoints();
+                        } else if(teamname.equalsIgnoreCase("Grey")) {
+                            int points = MCSU.greypoints + placementpoints[place-1];
+                            Config.get().set("Points.GreyPoints",Integer.toString(points));
+                            MCSU.getPoints();
+                        } else if(teamname.equalsIgnoreCase("White")) {
+                            int points = MCSU.whitepoints + placementpoints[place-1];
+                            Config.get().set("Points.WhitePoints",Integer.toString(points));
+                            MCSU.getPoints();
+                        }
+                        if(finishers.size() == Bukkit.getOnlinePlayers().size()) {
+                            stopSlimekour();
+                            for(Player players : Bukkit.getOnlinePlayers()) {
+                                players.sendTitle(ChatColor.AQUA+"Game Over!","");
+                            }
+                        }
+                        Bukkit.broadcastMessage(ChatColor.BLUE+slimekourplayer.getName()+ChatColor.WHITE+" finished the slimekour in "+ChatColor.GREEN+place+"."+ChatColor.WHITE+" with a time of "+fancytimer);
+                        Bukkit.broadcastMessage(ChatColor.BLUE+slimekourplayer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+placementpoints[place-1]+ChatColor.WHITE+" points!");
+                        slimekourplayer.playSound(slimekourplayer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
+                        slimekourplayer.playSound(slimekourplayer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
                     }
-                    Bukkit.broadcastMessage(ChatColor.BLUE+slimekourplayer.getName()+ChatColor.WHITE+" finished the slimekour in "+ChatColor.GREEN+place+"."+ChatColor.WHITE+" with a time of "+fancytimer);
-                    Bukkit.broadcastMessage(ChatColor.BLUE+slimekourplayer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+placementpoints[place-1]+ChatColor.WHITE+" points!");
-                    slimekourplayer.playSound(slimekourplayer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
-                    slimekourplayer.playSound(slimekourplayer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
+                    slimekourplayer.setGameMode(GameMode.SPECTATOR);
                 }
-                slimekourplayer.setGameMode(GameMode.SPECTATOR);
             }
         }
     }

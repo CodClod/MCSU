@@ -43,11 +43,17 @@ commands:
   horserace:
     description: Starts the horse race.
     usage: </command>
+  stophorserace:
+    description: Stops the horse race.
+    usage: </command>
   v:
     description: Invis command.
     usage: </command>
   buildingmap:
     description: Sets the world back to the building map.
+    usage: </command>
+  battleships:
+    description: Starts Battleships
     usage: </command>
   ctf:
     description: Starts capture the flag.
@@ -96,4 +102,7 @@ commands:
     usage: </command
   nick:
     description: Nick a player.
+    usage: </command>
+  winner:
+    description: Selects the winner of MCSU!
     usage: </command>
