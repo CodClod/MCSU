@@ -3,6 +3,7 @@ package com.cloud.mcsu.items;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,12 +19,27 @@ public class Items {
     public static ItemStack beesteeringwheel;
     public static ItemStack taco;
     public static ItemStack spaceboots;
+    public static ItemStack kbstick;
 
     public static void init() {
         createTrophy();
         createBeesteeringwheel();
         createTaco(1);
         createSpaceBoots();
+        createKbStick();
+    }
+
+    private static void createKbStick() {
+        ItemStack item = new ItemStack(Material.STICK, 1);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName("§5Annoying Stick");
+        meta.addEnchant(Enchantment.KNOCKBACK,1,true);
+        List<String> lore = new ArrayList<>();
+        lore.add("§7Use this stick to annoy enemies or to boost teammates");
+        lore.add("§415 Second cooldown on this stick");
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        kbstick = item;
     }
 
     private static void createTrophy() {

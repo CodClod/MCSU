@@ -14,6 +14,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -63,7 +66,7 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
         //getCommand("beeriding").setExecutor(new Commands());
         //getCommand("cosmetic").setExecutor(new Commands());
         //getCommand("heal").setExecutor(new Commands());
-        // getCommand("hub").setExecutor(new Commands());
+         getCommand("hub").setExecutor(new Commands());
         //getCommand("gui").setExecutor(new Commands());
         getCommand("sg").setExecutor(new SG());
         getCommand("stopsg").setExecutor(new SG());
@@ -81,6 +84,7 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
         getCommand("hideandseek").setExecutor(new HideAndSeek());
         getCommand("stophideandseek").setExecutor(new HideAndSeek());
         getCommand("battleships").setExecutor(new Battleships());
+        getCommand("stopbattleships").setExecutor(new Battleships());
         //getCommand("timer").setExecutor(new HideAndSeek());
         //getCommand("taco").setExecutor(new Commands());
         //getCommand("ace").setExecutor(new Commands());
@@ -92,6 +96,10 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
         getCommand("event").setExecutor(new Event());
         getCommand("resetpoints").setExecutor(new Commands());
         //getCommand("nick").setExecutor(new Commands());
+        getCommand("spleef").setExecutor(new Spleef());
+        getCommand("stopspleef").setExecutor(new Spleef());
+        getCommand("sumo").setExecutor(new Sumo());
+        getCommand("stopsumo").setExecutor(new Sumo());
         getServer().getPluginManager().registerEvents(new Events(), this);
         getServer().getPluginManager().registerEvents(new SG(), this);
         getServer().getPluginManager().registerEvents(new WorldManager(), this);
@@ -102,6 +110,9 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
         getServer().getPluginManager().registerEvents(new GangBeasts(), this);
         getServer().getPluginManager().registerEvents(new HideAndSeek(),this);
         getServer().getPluginManager().registerEvents(new GUI(),this);
+        getServer().getPluginManager().registerEvents(new Battleships(),this);
+        getServer().getPluginManager().registerEvents(new Spleef(),this);
+        getServer().getPluginManager().registerEvents(new Sumo(),this);
         // getServer().getPluginManager().registerEvents(new MiningMayhem(), this);
         getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[MCSU]: Plugin is enabled!");
         Items.init();
@@ -210,7 +221,7 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
     public static void createBoard(Player player) {
         manager = Bukkit.getScoreboardManager();
         board = manager.getNewScoreboard();
-        Objective obj = board.registerNewObjective("MCSU","dummy","§a§lMinecraft Sundays");
+        Objective obj = board.registerNewObjective("MCSU","dummy","§a§lMinecraft "+getDay()+"!");
         obj.setDisplaySlot(DisplaySlot.SIDEBAR);
         onlineplayers = Bukkit.getOnlinePlayers().size();
         if(currentgame == null) {
@@ -229,37 +240,53 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
         player.setScoreboard(board);
         // Teams
         MCSU.blueteam = MCSU.board.registerNewTeam("Blue");
-        MCSU.blueteam.setDisplayName(ChatColor.BLUE+"Blue Bears");
+        MCSU.blueteam.setDisplayName(ChatColor.BLUE+"Blue Bitches");
         MCSU.blueteam.setColor(ChatColor.BLUE);
         MCSU.blueteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.BLUE+"[Blue] ");
+        MCSU.blueteam.setAllowFriendlyFire(true);
+        MCSU.blueteam.allowFriendlyFire();
         MCSU.redteam = MCSU.board.registerNewTeam("Red");
-        MCSU.redteam.setDisplayName(ChatColor.RED+"Red Reindeers");
+        MCSU.redteam.setDisplayName(ChatColor.RED+"Red Mushrooms");
         MCSU.redteam.setColor(ChatColor.RED);
+        MCSU.redteam.setAllowFriendlyFire(true);
+        MCSU.redteam.allowFriendlyFire();
         MCSU.redteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.RED+"[Red] ");
         MCSU.greenteam = MCSU.board.registerNewTeam("Green");
-        MCSU.greenteam.setDisplayName(ChatColor.GREEN+"Green Gorillas");
+        MCSU.greenteam.setDisplayName(ChatColor.GREEN+"Green Gigachads");
         MCSU.greenteam.setColor(ChatColor.GREEN);
         MCSU.greenteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.GREEN+"[Green] ");
+        MCSU.greenteam.setAllowFriendlyFire(true);
+        MCSU.greenteam.allowFriendlyFire();
         MCSU.yellowteam = MCSU.board.registerNewTeam("Yellow");
         MCSU.yellowteam.setDisplayName(ChatColor.YELLOW+"Yellow Yetis");
         MCSU.yellowteam.setColor(ChatColor.YELLOW);
         MCSU.yellowteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.YELLOW+"[Yellow] ");
+        MCSU.yellowteam.setAllowFriendlyFire(true);
+        MCSU.yellowteam.allowFriendlyFire();
         MCSU.aquateam = MCSU.board.registerNewTeam("Aqua");
         MCSU.aquateam.setDisplayName(ChatColor.AQUA+"Aqua Axolotols");
         MCSU.aquateam.setColor(ChatColor.AQUA);
         MCSU.aquateam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.AQUA+"[Aqua] ");
+        MCSU.aquateam.setAllowFriendlyFire(true);
+        MCSU.aquateam.allowFriendlyFire();
         MCSU.pinkteam = MCSU.board.registerNewTeam("Pink");
-        MCSU.pinkteam.setDisplayName(ChatColor.LIGHT_PURPLE+"Pink Pandas");
+        MCSU.pinkteam.setDisplayName(ChatColor.LIGHT_PURPLE+"Pink PogChamps");
         MCSU.pinkteam.setColor(ChatColor.LIGHT_PURPLE);
         MCSU.pinkteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.LIGHT_PURPLE+"[Pink] ");
+        MCSU.pinkteam.setAllowFriendlyFire(true);
+        MCSU.pinkteam.allowFriendlyFire();
         MCSU.greyteam = MCSU.board.registerNewTeam("Grey");
-        MCSU.greyteam.setDisplayName(ChatColor.GRAY+"Grey Gorillas");
+        MCSU.greyteam.setDisplayName(ChatColor.GRAY+"Grey Goats");
         MCSU.greyteam.setColor(ChatColor.GRAY);
         MCSU.greyteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.GRAY+"[Grey] ");
+        MCSU.greyteam.setAllowFriendlyFire(true);
+        MCSU.greyteam.allowFriendlyFire();
         MCSU.whiteteam = MCSU.board.registerNewTeam("White");
         MCSU.whiteteam.setDisplayName(ChatColor.WHITE+"White Walruses");
         MCSU.whiteteam.setColor(ChatColor.WHITE);
         MCSU.whiteteam.setPrefix(ChatColor.GOLD+"[OG] "+ChatColor.WHITE+"[White] ");
+        MCSU.whiteteam.setAllowFriendlyFire(true);
+        MCSU.whiteteam.allowFriendlyFire();
 
         bluepoints = Integer.parseInt(Config.get().getString("Points.BluePoints"));
         redpoints = Integer.parseInt(Config.get().getString("Points.RedPoints"));
@@ -342,20 +369,21 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
          */
 
         // Adding Players
-        MCSU.greenteam.addEntry("WaitWhosCandice");
-        MCSU.aquateam.addEntry("axob");
-        MCSU.blueteam.addEntry("AceyXS");
-        MCSU.yellowteam.addEntry("FortniteFloppers");
-        MCSU.redteam.addEntry("FishGamer33");
-        MCSU.greyteam.addEntry("Anonymous1252");
-        MCSU.blueteam.addEntry("tunae");
-        MCSU.yellowteam.addEntry("stanowar");
-        MCSU.greenteam.addEntry("leaef");
-        MCSU.greyteam.addEntry("JackyWackers");
-        MCSU.aquateam.addEntry("happygamer1977");
-        MCSU.pinkteam.addEntry("CakeIsTasty");
-        MCSU.blueteam.addEntry("SloughyQuasar");
-        MCSU.whiteteam.addEntry("fireball123bro");
+        redteam.addEntry("JackyWackers");
+        redteam.addEntry("goshroom");
+        aquateam.addEntry("axob");
+        aquateam.addEntry("stanowar");
+        greenteam.addEntry("PogGamer");
+        greenteam.addEntry("WaitWhosCandice");
+        whiteteam.addEntry("CakeIsTasty");
+        whiteteam.addEntry("tunae");
+        greyteam.addEntry("AceyXS");
+        yellowteam.addEntry("BioBlue_");
+        yellowteam.addEntry("Fluubs");
+        blueteam.addEntry("Slurpfishy");
+        blueteam.addEntry("Harmonising");
+        pinkteam.addEntry("SloughyQuasar");
+        pinkteam.addEntry("Flubers");
 
         if(HideAndSeek.hideandseekStarted) {
             if(HideAndSeek.round == 1) {
@@ -378,6 +406,15 @@ public class MCSU extends JavaPlugin implements CommandExecutor {
                 MCSU.whiteteam.setSuffix(ChatColor.GREEN+" [Tagger]");
             }
         }
+    }
+
+    public static String getDay() {
+        Date date=new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        String dayWeekText = new SimpleDateFormat("EEEE").format(date);
+        return dayWeekText;
     }
 
     public static Map<String, Integer> sortByValueDesc(Map<String, Integer> map) {

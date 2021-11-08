@@ -259,7 +259,7 @@ public class HorseRace implements CommandExecutor, Listener {
                     }
                     for(Player players : Bukkit.getOnlinePlayers()) {
                         if(!finishers.contains(players)) {
-                            players.spigot().sendMessage(ChatMessageType.ACTION_BAR,new TextComponent("Lap "+laps.get(players)+"/3 Time: "+fancytimer));
+                            players.spigot().sendMessage(ChatMessageType.ACTION_BAR,new TextComponent("Lap "+laps.get(players)+"/2 Time: "+fancytimer));
                         } else {
                             players.spigot().sendMessage(ChatMessageType.ACTION_BAR,new TextComponent("Finished Horse Race!"));
                         }
@@ -376,17 +376,10 @@ public class HorseRace implements CommandExecutor, Listener {
                     laps.put(horseplayer,2);
                     lapallowed.put(horseplayer,Boolean.FALSE);
                     for(Player players : Bukkit.getOnlinePlayers()) {
-                        players.sendMessage(ChatColor.BLUE+horseplayer.getName()+ChatColor.WHITE+" finished Lap 1/3 in "+fancytimer);
+                        players.sendMessage(ChatColor.BLUE+horseplayer.getName()+ChatColor.WHITE+" finished Lap 1/2 in "+fancytimer);
                     }
                 }
                 if(playerlap == 2 && allowedlap) {
-                    laps.put(horseplayer,3);
-                    lapallowed.put(horseplayer,Boolean.FALSE);
-                    for(Player players : Bukkit.getOnlinePlayers()) {
-                        players.sendMessage(ChatColor.BLUE+horseplayer.getName()+ChatColor.WHITE+" finished Lap 2/3 in "+fancytimer);
-                    }
-                }
-                if(playerlap == 3 && allowedlap) {
                     if(!finishers.contains(horseplayer)) {
                         finishers.add(horseplayer);
                         Team team = horseplayer.getScoreboard().getPlayerTeam(horseplayer);
@@ -426,20 +419,20 @@ public class HorseRace implements CommandExecutor, Listener {
                             MCSU.getPoints();
                         }
                         for(Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendMessage(ChatColor.BLUE+horseplayer.getName()+ChatColor.WHITE+" finished Lap 3/3 in "+fancytimer);
+                            players.sendMessage(ChatColor.BLUE+horseplayer.getName()+ChatColor.WHITE+" finished Lap 2/2 in "+fancytimer);
                         }
                         Bukkit.broadcastMessage(ChatColor.BLUE+horseplayer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+placementpoints[place-1]+ChatColor.WHITE+" points!");
                         horseplayer.playSound(horseplayer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                         horseplayer.playSound(horseplayer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
                         Bukkit.broadcastMessage(ChatColor.BLUE+horseplayer.getName()+ChatColor.WHITE+" finished the horse race in "+ChatColor.GREEN+place+"."+ChatColor.WHITE+" with a time of "+fancytimer);
-                    }
-                    horseplayer.getVehicle().removePassenger(horseplayer);
-                    horseplayer.getVehicle().remove();
-                    horseplayer.setGameMode(GameMode.SPECTATOR);
-                    if(finishers.size() == Bukkit.getOnlinePlayers().size()) {
-                        stopHorseRace();
-                        for(Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendTitle(ChatColor.AQUA+"Game Over!","");
+                        horseplayer.getVehicle().removePassenger(horseplayer);
+                        horseplayer.getVehicle().remove();
+                        horseplayer.setGameMode(GameMode.SPECTATOR);
+                        if(finishers.size() == Bukkit.getOnlinePlayers().size()) {
+                            stopHorseRace();
+                            for(Player players : Bukkit.getOnlinePlayers()) {
+                                players.sendTitle(ChatColor.AQUA+"Game Over!","");
+                            }
                         }
                     }
                 }

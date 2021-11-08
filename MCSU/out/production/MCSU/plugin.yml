@@ -55,6 +55,9 @@ commands:
   battleships:
     description: Starts Battleships
     usage: </command>
+  stopbattleships:
+    description: Stops Battleships
+    usage: </command>
   ctf:
     description: Starts capture the flag.
     usage: </command>
@@ -105,4 +108,16 @@ commands:
     usage: </command>
   winner:
     description: Selects the winner of MCSU!
+    usage: </command>
+  spleef:
+    description: Starts a game of spleef.
+    usage: </command>
+  stopspleef:
+    description: Stops spleef
+    usage: </command>
+  sumo:
+    description: Starts a game of sumo.
+    usage: </command>
+  stopsumo:
+    description: Stops sumo
     usage: </command>

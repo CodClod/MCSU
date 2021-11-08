@@ -91,15 +91,10 @@ public class Commands implements CommandExecutor {
                         }
                     }
                 }, 0L,20L);
-                for(String t : player.getScoreboard().getTeam(first).getEntries()) {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"give "+t+" minecraft:player_head{display:{Name:\"{\\\"text\\\":\\\"Trophy\\\",\\\"italic\\\":\\\"false\\\"}\"},SkullOwner:{Id:[I;1828030356,-434813918,-1290808784,506757473],Properties:{textures:[{Value:\"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==\"}]}}} 1");
-                    Bukkit.getPlayer(t).teleport(new Location(player.getWorld(),-73.5,12.5,155.5));
-                }
-                for(String t : player.getScoreboard().getTeam(second).getEntries()) {
-                    Bukkit.getPlayer(t).teleport(new Location(player.getWorld(),-73.5,17.5,155.5));
-                }
-                for(String t : player.getScoreboard().getTeam(third).getEntries()) {
-                    Bukkit.getPlayer(t).teleport(new Location(player.getWorld(),-77,16.5,155.5));
+                for(String players : player.getScoreboard().getTeam(first).getEntries()) {
+                    if(Bukkit.getPlayer(players).isOnline()) {
+                        Bukkit.getPlayer(players).teleport(new Location(Bukkit.getPlayer(players).getWorld(),-73.5,13,144.3));
+                    }
                 }
             }
         }
