@@ -6,6 +6,7 @@ import com.cloud.mcsu.config.Config;
 import com.cloud.mcsu.event.Event;
 import com.cloud.mcsu.worldreset.WorldManager;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -81,21 +82,6 @@ public class GangBeasts implements CommandExecutor, Listener {
 
     public static void gangbeastsCommand(Player p, int r) {
         world = p.getWorld();
-        List<Entity> entList = world.getEntities();//get all entities in the world
-        for(Entity current : entList) {//loop through the list
-            if (current instanceof Item) {//make sure we aren't deleting mobs/players
-                current.remove();//remove it
-            }
-            if (current instanceof Creeper) {//make sure we aren't deleting mobs/players
-                current.remove();//remove it
-            }
-            if (current instanceof Skeleton) {//make sure we aren't deleting mobs/players
-                current.remove();//remove it
-            }
-            if (current instanceof Arrow) {//make sure we aren't deleting mobs/players
-                current.remove();//remove it
-            }
-        }
         for(Player players : Bukkit.getOnlinePlayers()) {
             players.setInvulnerable(false);
         }
@@ -429,6 +415,21 @@ public class GangBeasts implements CommandExecutor, Listener {
                     p.teleport(spawns.get(3));
                 }
             }
+            List<Entity> entList = world.getEntities();//get all entities in the world
+            for(Entity current : entList) {//loop through the list
+                if (current instanceof Item) {//make sure we aren't deleting mobs/players
+                    current.remove();//remove it
+                }
+                if (current instanceof Creeper) {//make sure we aren't deleting mobs/players
+                    current.remove();//remove it
+                }
+                if (current instanceof Skeleton) {//make sure we aren't deleting mobs/players
+                    current.remove();//remove it
+                }
+                if (current instanceof Arrow) {//make sure we aren't deleting mobs/players
+                    current.remove();//remove it
+                }
+            }
         }
     }
 
@@ -449,66 +450,66 @@ public class GangBeasts implements CommandExecutor, Listener {
         String teamname = team.getName();
         if(gangbeastsStarted) {
             if(teamname.equals("Blue")) {
-                int points = MCSU.bluepoints + 20;
+                int points = MCSU.bluepoints + 40;
                 Config.get().set("Points.BluePoints",Integer.toString(points));
                 MCSU.getPoints();
-                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"20"+ChatColor.WHITE+" points!");
+                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"40"+ChatColor.WHITE+" points!");
                 killer.playSound(killer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                 killer.playSound(killer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
             }
             if(teamname.equals("Pink")) {
-                int points = MCSU.pinkpoints + 20;
+                int points = MCSU.pinkpoints + 40;
                 Config.get().set("Points.PinkPoints",Integer.toString(points));
                 MCSU.getPoints();
-                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"20"+ChatColor.WHITE+" points!");
+                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"40"+ChatColor.WHITE+" points!");
                 killer.playSound(killer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                 killer.playSound(killer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
             }
             if(teamname.equals("Yellow")) {
-                int points = MCSU.yellowpoints + 20;
+                int points = MCSU.yellowpoints + 40;
                 Config.get().set("Points.YellowPoints",Integer.toString(points));
                 MCSU.getPoints();
-                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"20"+ChatColor.WHITE+" points!");
+                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"40"+ChatColor.WHITE+" points!");
                 killer.playSound(killer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                 killer.playSound(killer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
             }
             if(teamname.equals("Green")) {
-                int points = MCSU.greenpoints + 20;
+                int points = MCSU.greenpoints + 40;
                 Config.get().set("Points.GreenPoints",Integer.toString(points));
                 MCSU.getPoints();
-                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"20"+ChatColor.WHITE+" points!");
+                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"40"+ChatColor.WHITE+" points!");
                 killer.playSound(killer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                 killer.playSound(killer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
             }
             if(teamname.equals("Red")) {
-                int points = MCSU.redpoints + 20;
+                int points = MCSU.redpoints + 40;
                 Config.get().set("Points.RedPoints",Integer.toString(points));
                 MCSU.getPoints();
-                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"20"+ChatColor.WHITE+" points!");
+                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"40"+ChatColor.WHITE+" points!");
                 killer.playSound(killer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                 killer.playSound(killer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
             }
             if(teamname.equals("Grey")) {
-                int points = MCSU.greypoints + 20;
+                int points = MCSU.greypoints + 40;
                 Config.get().set("Points.GreyPoints",Integer.toString(points));
                 MCSU.getPoints();
-                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"20"+ChatColor.WHITE+" points!");
+                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"40"+ChatColor.WHITE+" points!");
                 killer.playSound(killer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                 killer.playSound(killer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
             }
             if(teamname.equals("Aqua")) {
-                int points = MCSU.aquapoints + 20;
+                int points = MCSU.aquapoints + 40;
                 Config.get().set("Points.AquaPoints",Integer.toString(points));
                 MCSU.getPoints();
-                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"20"+ChatColor.WHITE+" points!");
+                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"40"+ChatColor.WHITE+" points!");
                 killer.playSound(killer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                 killer.playSound(killer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
             }
             if(teamname.equals("White")) {
-                int points = MCSU.whitepoints + 20;
+                int points = MCSU.whitepoints + 40;
                 Config.get().set("Points.WhitePoints",Integer.toString(points));
                 MCSU.getPoints();
-                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"20"+ChatColor.WHITE+" points!");
+                Bukkit.broadcastMessage(ChatColor.BLUE+killer.getName()+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"40"+ChatColor.WHITE+" points!");
                 killer.playSound(killer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                 killer.playSound(killer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
             }
@@ -521,6 +522,11 @@ public class GangBeasts implements CommandExecutor, Listener {
             if(e.getEntity() instanceof Creeper) {
                 e.setCancelled(true);
                 e.getEntity().getWorld().createExplosion(e.getLocation(),10);
+            } else {
+                for(Block block : e.blockList()) {
+                    block.setType(Material.AIR);
+                }
+                e.blockList().clear();
             }
         }
     }
@@ -534,6 +540,7 @@ public class GangBeasts implements CommandExecutor, Listener {
             String teamname = team.getName();
             int i = 0;
             deadplayers.add(deadplayer);
+            onlineteamplayers.put(teamname,0);
             for (String players : team.getEntries()) {
                 if (Bukkit.getOnlinePlayers().contains(Bukkit.getPlayer(players))) {
                     onlineteamplayers.put(teamname, onlineteamplayers.get(teamname) + 1);
@@ -555,7 +562,7 @@ public class GangBeasts implements CommandExecutor, Listener {
             }
             int teamsleftcount = onlineteams.size() - deadteams.size();
             int j;
-            if(onlineteams.size() >= 8) {
+            if(onlineteams.size() > 4) {
                 j = 2;
             } else {
                 j = 1;
@@ -581,7 +588,7 @@ public class GangBeasts implements CommandExecutor, Listener {
     public static void onDmg(EntityDamageEvent e) {
         if(gangbeastsStarted) {
             if(e.getCause() == EntityDamageEvent.DamageCause.LAVA) {
-                e.setDamage(1000);
+                e.setDamage(4);
             } else if(e.getCause() == EntityDamageEvent.DamageCause.VOID) {
                 e.setDamage(1000);
             } else {

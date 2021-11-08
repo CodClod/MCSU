@@ -65,6 +65,9 @@ public class SG implements CommandExecutor, Listener {
         if(player.isOp() && cmd.getName().equalsIgnoreCase("stopsg")) {
             stopSG();
         }
+        if(player.isOp() && cmd.getName().equalsIgnoreCase("sgchest")) {
+            sgChest();
+        }
         return true;
     }
 
@@ -229,15 +232,6 @@ public class SG implements CommandExecutor, Listener {
         for (Player players : Bukkit.getOnlinePlayers()) {
             players.setInvulnerable(false);
         }
-        List<Entity> entList = world.getEntities();//get all entities in the world
-        for(Entity current : entList) {//loop through the list
-            if (current instanceof Item) {//make sure we aren't deleting mobs/players
-                current.remove();//remove it
-            }
-            if( current instanceof Arrow) {
-                current.remove();
-            }
-        }
         getChests();
         for(Player p: Bukkit.getOnlinePlayers()) {
             p.setGameMode(GameMode.SURVIVAL);
@@ -279,10 +273,20 @@ public class SG implements CommandExecutor, Listener {
             }
             p.sendTitle("Go!", "", 1, 20, 1);
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1,5);
+            List<Entity> entList = world.getEntities();//get all entities in the world
+            for(Entity current : entList) {//loop through the list
+                if (current instanceof Item) {//make sure we aren't deleting mobs/players
+                    current.remove();//remove it
+                }
+                if( current instanceof Arrow) {
+                    current.remove();
+                }
+            }
         }
         stopTimer();
         sgStarted = true;
         world.getWorldBorder().setSize(200,0);
+        world.getBlockAt(new Location(world,1107,3,197)).setType(Material.GRASS_BLOCK);
     }
 
     public static void fillChest(Location loc, World world) {
@@ -417,6 +421,10 @@ public class SG implements CommandExecutor, Listener {
         c.getInventory().setItem(rand.nextInt(27),items[rand.nextInt(items.length)]);
     }
 
+    public static void sgChest() {
+        fillChest(new Location(world,2485,4,83),world);
+    }
+
     public static void setTimer(int amount) {
         time = amount;
     }
@@ -477,11 +485,19 @@ public class SG implements CommandExecutor, Listener {
     }
 
     @EventHandler
-    public static void onKillPoint(PlayerDeathEvent e) {
-        Player killer = e.getEntity().getKiller();
-        Team team = killer.getScoreboard().getPlayerTeam(killer);
-        String teamname = team.getName();
+    public static void onBreakBlock(BlockBreakEvent e) {
         if(sgStarted) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public static void onDeath(PlayerDeathEvent e) {
+        if(sgStarted) {
+            Player deadplayer = e.getEntity();
+            Player killer = e.getEntity().getKiller();
+            Team team = deadplayer.getScoreboard().getPlayerTeam(deadplayer);
+            String teamname = team.getName();
             if(teamname.equals("Blue")) {
                 int points = MCSU.bluepoints + 20;
                 Config.get().set("Points.BluePoints",Integer.toString(points));
@@ -546,25 +562,9 @@ public class SG implements CommandExecutor, Listener {
                 killer.playSound(killer.getLocation(),Sound.ENTITY_ARROW_HIT_PLAYER,100,1);
                 killer.playSound(killer.getLocation(),Sound.ENTITY_GENERIC_EXPLODE,100,1);
             }
-        }
-    }
-
-    @EventHandler
-    public static void onBreakBlock(BlockBreakEvent e) {
-        if(sgStarted) {
-            e.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public static void onDeath(PlayerDeathEvent e) {
-        if(sgStarted) {
-            Player deadplayer = e.getEntity();
-            Player killer = e.getEntity().getKiller();
-            Team team = deadplayer.getScoreboard().getPlayerTeam(deadplayer);
-            String teamname = team.getName();
             int i = 0;
             deadplayers.add(deadplayer);
+            onlineteamplayers.put(teamname,0);
             for(String players : team.getEntries()) {
                 if(Bukkit.getOnlinePlayers().contains(Bukkit.getPlayer(players))) {
                     onlineteamplayers.put(teamname,onlineteamplayers.get(teamname)+1);
@@ -586,188 +586,90 @@ public class SG implements CommandExecutor, Listener {
                 for(Player players : Bukkit.getOnlinePlayers()) {
                     players.sendMessage(players.getScoreboard().getTeam(teamname).getColor()+teamname+ChatColor.WHITE+" has been eliminated.");
                 }
-                if(teamsleftcount == 2) {
-                    if(!deadteams.contains("Blue") && onlineteams.contains("Blue")) {
-                        int points = MCSU.bluepoints + 50;
-                        Config.get().set("Points.BluePoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Red") && onlineteams.contains("Red")) {
-                        int points = MCSU.redpoints + 50;
-                        Config.get().set("Points.RedPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Green") && onlineteams.contains("Green")) {
-                        int points = MCSU.greenpoints + 50;
-                        Config.get().set("Points.GreenPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Yellow") && onlineteams.contains("Yellow")) {
-                        int points = MCSU.yellowpoints + 50;
-                        Config.get().set("Points.YellowPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Aqua") && onlineteams.contains("Aqua")) {
-                        int points = MCSU.aquapoints + 50;
-                        Config.get().set("Points.AquaPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Pink") && onlineteams.contains("Pink")) {
-                        int points = MCSU.pinkpoints + 50;
-                        Config.get().set("Points.PinkPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Grey") && onlineteams.contains("Grey")) {
-                        int points = MCSU.greypoints + 50;
-                        Config.get().set("Points.GreyPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("White") && onlineteams.contains("White")) {
-                        int points = MCSU.whitepoints + 50;
-                        Config.get().set("Points.WhitePoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    }
-                    Bukkit.broadcastMessage(ChatColor.BLUE+"2 Teams "+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"50"+ChatColor.WHITE+" points for surviving!");
+            }
+            if (teamsleftcount == 1) {
+                for (Player players : Bukkit.getOnlinePlayers()) {
+                    players.setInvulnerable(true);
                 }
-                if(teamsleftcount == 4) {
-                    if(!deadteams.contains("Blue") && onlineteams.contains("Blue")) {
-                        int points = MCSU.bluepoints + 25;
-                        Config.get().set("Points.BluePoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Red") && onlineteams.contains("Red")) {
-                        int points = MCSU.redpoints + 25;
-                        Config.get().set("Points.RedPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Green") && onlineteams.contains("Green")) {
-                        int points = MCSU.greenpoints + 25;
-                        Config.get().set("Points.GreenPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Yellow") && onlineteams.contains("Yellow")) {
-                        int points = MCSU.yellowpoints + 25;
-                        Config.get().set("Points.YellowPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Aqua") && onlineteams.contains("Aqua")) {
-                        int points = MCSU.aquapoints + 25;
-                        Config.get().set("Points.AquaPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Pink") && onlineteams.contains("Pink")) {
-                        int points = MCSU.pinkpoints + 25;
-                        Config.get().set("Points.PinkPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Grey") && onlineteams.contains("Grey")) {
-                        int points = MCSU.greypoints + 25;
-                        Config.get().set("Points.GreyPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("White") && onlineteams.contains("White")) {
-                        int points = MCSU.whitepoints + 25;
-                        Config.get().set("Points.WhitePoints",Integer.toString(points));
-                        MCSU.getPoints();
+                if (!deadteams.contains("Blue") && onlineteams.contains("Blue")) {
+                    Bukkit.broadcastMessage(ChatColor.BLUE + MCSU.blueteam.getDisplayName()+" win SG!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle(MCSU.blueteam.getColor()+MCSU.blueteam.getDisplayName()+" win SG!", "");
                     }
-                    Bukkit.broadcastMessage(ChatColor.BLUE+"4 Teams "+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"25"+ChatColor.WHITE+" points for surviving!");
+                    int points = MCSU.bluepoints + 150;
+                    Config.get().set("Points.BluePoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("Red") && onlineteams.contains("Red")) {
+                    Bukkit.broadcastMessage(ChatColor.RED +MCSU.redteam.getDisplayName()+ " win SG!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle(MCSU.redteam.getColor()+MCSU.redteam.getDisplayName()+" win SG!", "");
+                    }
+                    int points = MCSU.redpoints + 150;
+                    Config.get().set("Points.RedPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                    spawnFireworks(killer.getLocation(),2,Color.RED);
+                } else if (!deadteams.contains("Green") && onlineteams.contains("Green")) {
+                    Bukkit.broadcastMessage(ChatColor.GREEN +MCSU.greenteam.getDisplayName()+ " win SG!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle(MCSU.greenteam.getColor()+MCSU.greenteam.getDisplayName()+" win SG!", "");
+                    }
+                    int points = MCSU.greenpoints + 150;
+                    Config.get().set("Points.GreenPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                    spawnFireworks(killer.getLocation(),2,Color.GREEN);
+                } else if (!deadteams.contains("Yellow") && onlineteams.contains("Yellow")) {
+                    Bukkit.broadcastMessage(ChatColor.YELLOW + MCSU.yellowteam.getDisplayName()+ "win SG!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle(MCSU.yellowteam.getColor()+MCSU.yellowteam.getDisplayName()+" win SG!", "");
+                    }
+                    int points = MCSU.yellowpoints + 150;
+                    Config.get().set("Points.YellowPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("Aqua") && onlineteams.contains("Aqua")) {
+                    Bukkit.broadcastMessage(ChatColor.AQUA + MCSU.aquateam.getDisplayName()+" win SG!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle(MCSU.aquateam.getColor()+MCSU.aquateam.getDisplayName()+" win SG!", "");
+                    }
+                    int points = MCSU.aquapoints + 150;
+                    Config.get().set("Points.AquaPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("Pink") && onlineteams.contains("Pink")) {
+                    Bukkit.broadcastMessage(ChatColor.LIGHT_PURPLE +MCSU.pinkteam.getDisplayName()+ " win SG!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle(MCSU.pinkteam.getColor()+MCSU.pinkteam.getDisplayName()+" win SG!", "");
+                    }
+                    int points = MCSU.pinkpoints + 150;
+                    Config.get().set("Points.PinkPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("Grey") && onlineteams.contains("Grey")) {
+                    Bukkit.broadcastMessage(ChatColor.GRAY +MCSU.greyteam.getDisplayName()+ " win SG!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle(MCSU.greyteam.getColor()+MCSU.greyteam.getDisplayName()+" win SG!", "");
+                    }
+                    int points = MCSU.greypoints + 150;
+                    Config.get().set("Points.GreyPoints", Integer.toString(points));
+                    MCSU.getPoints();
+                } else if (!deadteams.contains("White") && onlineteams.contains("White")) {
+                    Bukkit.broadcastMessage(ChatColor.WHITE +MCSU.whiteteam.getDisplayName()+ " win SG!");
+                    for(Player players : Bukkit.getOnlinePlayers()) {
+                        players.sendTitle(MCSU.whiteteam.getColor()+MCSU.whiteteam.getDisplayName()+" win SG!", "");
+                    }
+                    int points = MCSU.whitepoints + 150;
+                    Config.get().set("Points.WhitePoints", Integer.toString(points));
+                    MCSU.getPoints();
                 }
-                if(teamsleftcount == 3) {
-                    if(!deadteams.contains("Blue") && onlineteams.contains("Blue")) {
-                        int points = MCSU.bluepoints + 25;
-                        Config.get().set("Points.BluePoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Red") && onlineteams.contains("Red")) {
-                        int points = MCSU.redpoints + 25;
-                        Config.get().set("Points.RedPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Green") && onlineteams.contains("Green")) {
-                        int points = MCSU.greenpoints + 25;
-                        Config.get().set("Points.GreenPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Yellow") && onlineteams.contains("Yellow")) {
-                        int points = MCSU.yellowpoints + 25;
-                        Config.get().set("Points.YellowPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Aqua") && onlineteams.contains("Aqua")) {
-                        int points = MCSU.aquapoints + 25;
-                        Config.get().set("Points.AquaPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Pink") && onlineteams.contains("Pink")) {
-                        int points = MCSU.pinkpoints + 25;
-                        Config.get().set("Points.PinkPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("Grey") && onlineteams.contains("Grey")) {
-                        int points = MCSU.greypoints + 25;
-                        Config.get().set("Points.GreyPoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if(!deadteams.contains("White") && onlineteams.contains("White")) {
-                        int points = MCSU.whitepoints + 25;
-                        Config.get().set("Points.WhitePoints",Integer.toString(points));
-                        MCSU.getPoints();
-                    }
-                    Bukkit.broadcastMessage(ChatColor.BLUE+"3 Teams "+ChatColor.WHITE+" just earned +"+ChatColor.GOLD+"25"+ChatColor.WHITE+" points for surviving!");
-                }
-                if (teamsleftcount == 1) {
-                    for (Player players : Bukkit.getOnlinePlayers()) {
-                        players.setInvulnerable(true);
-                    }
-
-                    if (!deadteams.contains("Blue") && onlineteams.contains("Blue")) {
-                        Bukkit.broadcastMessage(ChatColor.BLUE + "Blue Bears win SG!");
-                        for(Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendTitle("§1Blue Bears win SG!", "");
-                        }
-                        int points = MCSU.bluepoints + 75;
-                        Config.get().set("Points.BluePoints", Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if (!deadteams.contains("Red") && onlineteams.contains("Red")) {
-                        Bukkit.broadcastMessage(ChatColor.RED + "Red Reindeers win SG!");
-                        for(Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendTitle("§cRed Reindeers win SG!", "");
-                        }
-                        int points = MCSU.redpoints + 75;
-                        Config.get().set("Points.RedPoints", Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if (!deadteams.contains("Green") && onlineteams.contains("Green")) {
-                        Bukkit.broadcastMessage(ChatColor.GREEN + "Green Geckos win SG!");
-                        for(Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendTitle("§aGreen Geckos win SG!", "");
-                        }
-                        int points = MCSU.greenpoints + 75;
-                        Config.get().set("Points.GreenPoints", Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if (!deadteams.contains("Yellow") && onlineteams.contains("Yellow")) {
-                        Bukkit.broadcastMessage(ChatColor.YELLOW + "Yellow Yetis win SG!");
-                        for(Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendTitle("§eYellow Yetis win SG!", "");
-                        }
-                        int points = MCSU.yellowpoints + 75;
-                        Config.get().set("Points.YellowPoints", Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if (!deadteams.contains("Aqua") && onlineteams.contains("Aqua")) {
-                        Bukkit.broadcastMessage(ChatColor.AQUA + "Aqua Axolotols win SG!");
-                        for(Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendTitle("§bAqua Axolotols win SG!", "");
-                        }
-                        int points = MCSU.aquapoints + 75;
-                        Config.get().set("Points.AquaPoints", Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if (!deadteams.contains("Pink") && onlineteams.contains("Pink")) {
-                        Bukkit.broadcastMessage(ChatColor.LIGHT_PURPLE + "Pink Pandas win SG!");
-                        for(Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendTitle("§dPink Pandas win SG!", "");
-                        }
-                        int points = MCSU.pinkpoints + 75;
-                        Config.get().set("Points.PinkPoints", Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if (!deadteams.contains("Grey") && onlineteams.contains("Grey")) {
-                        Bukkit.broadcastMessage(ChatColor.GRAY + "Grey Gorillas win SG!");
-                        for(Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendTitle("§7Grey Gorillas win SG!", "");
-                        }
-                        int points = MCSU.greypoints + 75;
-                        Config.get().set("Points.GreyPoints", Integer.toString(points));
-                        MCSU.getPoints();
-                    } else if (!deadteams.contains("White") && onlineteams.contains("White")) {
-                        Bukkit.broadcastMessage(ChatColor.WHITE + "White Walruses win SG!");
-                        for(Player players : Bukkit.getOnlinePlayers()) {
-                            players.sendTitle("§fWhite Walruses win SG!", "");
-                        }
-                        int points = MCSU.whitepoints + 75;
-                        Config.get().set("Points.WhitePoints", Integer.toString(points));
-                        MCSU.getPoints();
-                    }
-                    stopSG();
-                }
+                stopSG();
             }
         }
+        /*
+        for(Player players : Bukkit.getOnlinePlayers()) {
+            players.sendMessage(ChatColor.RED+"[Debug]"+"Online team players: "+onlineteamplayers.toString());
+            players.sendMessage(ChatColor.RED+"[Debug]"+"Dead Teams: "+deadteams.toString());
+            players.sendMessage(ChatColor.RED+"[Debug]"+"Online teams: "+onlineteams.toString());
+            players.sendMessage(ChatColor.RED+"[Debug]"+"Dead Players: "+deadplayers.toString());
+        }
+
+         */
     }
 
     public static void spawnFireworks(Location location, int amount, Color color) {

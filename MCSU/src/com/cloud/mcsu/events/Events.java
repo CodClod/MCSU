@@ -7,6 +7,8 @@ import com.cloud.mcsu.event.Event;
 import com.cloud.mcsu.gui.GUI;
 import com.cloud.mcsu.items.Items;
 import com.cloud.mcsu.minigames.*;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.defaults.ReloadCommand;
@@ -22,15 +24,18 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import com.cloud.mcsu.MCSU;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
+import java.util.HashMap;
 import java.util.Random;
 
 public class Events implements Listener {
@@ -39,7 +44,13 @@ public class Events implements Listener {
     public static Plugin plugin = Bukkit.getPluginManager().getPlugin("MCSU");
     public static Location spawn;
     public static ItemStack gameselector;
+    public static int slimekouri = 100;
+    public static int horseracei = 100;
+    public static HashMap<Player, Integer> stopwatchtime = new HashMap<Player, Integer>();
+    public static HashMap<Player, Integer> stopwatchtaskID = new HashMap<Player, Integer>();
+    public static MCSU mcsu = MCSU.getPlugin(MCSU.class);
 
+    /*
     @EventHandler
     public static void onSpaceBootsJump(PlayerMoveEvent e) {
         Player player = e.getPlayer();
@@ -53,6 +64,8 @@ public class Events implements Listener {
             }
         }
     }
+
+     */
 
     @EventHandler
     public static void onSpaceBootsDmg(EntityDamageEvent e) {
@@ -175,6 +188,63 @@ public class Events implements Listener {
     }
 
     @EventHandler
+    public static void onStartParkour(PlayerInteractEvent e) {
+        if(e.getAction().equals(Action.PHYSICAL)) {
+            Player p = e.getPlayer();
+            int[] coords1 = {
+                    -165,
+                    3,
+                    120
+            };
+            int[] coords2 = {
+                    21,
+                    48,
+                    273
+            };
+            if(isPlayerInRegion(p,coords1,coords2)) {
+                if(e.getClickedBlock().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
+                    stopwatchtime.put(p,0);
+                    stopwatchtaskID.put(p,0);
+                    //stopwatch(p);
+                }
+            }
+        }
+    }
+
+    /*
+    public static void stopwatch(Player p) {
+        BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+        stopwatchtaskID.put(p,scheduler.scheduleSyncRepeatingTask((Plugin) mcsu, new Runnable() {
+            @Override
+            public void run() {
+                stopwatchtime = stopwatchtime + 1;
+                String fancytimer;
+                int finish = stopwatchtime / 60;
+                int remainder = stopwatchtime % 60;
+                if(Integer.toString(remainder).length() == 1 && Integer.toString(finish).length() == 1) {
+                    String finishremainder = "0"+remainder;
+                    String finishtime = "0"+finish;
+                    fancytimer = finishtime+":"+finishremainder;
+                } else if(Integer.toString(finish).length() == 1) {
+                    String finishtime = "0"+finish;
+                    fancytimer = finishtime+":"+remainder;
+                } else if(Integer.toString(remainder).length() == 1) {
+                    String finishremainder = "0"+remainder;
+                    fancytimer = finish+":"+finishremainder;
+                } else {
+                    fancytimer = finish+":"+remainder;
+                }
+            }
+        }, 0L, 20L));
+    }
+
+     */
+
+    public static void stopstopwatch() {
+
+    }
+
+    @EventHandler
     public static void noDmgSpawn(EntityDamageEvent e) {
         int[] coords1 = {
                 -165,
@@ -239,6 +309,8 @@ public class Events implements Listener {
         Player player = e.getPlayer();
         Team team = player.getScoreboard().getPlayerTeam(player);
         String teamname = team.getName();
+        MCSU.onlineplayers = Bukkit.getOnlinePlayers().size() - 1;
+        MCSU.createBoard(player);
         if(SG.sgStarted) {
             player.setGameMode(GameMode.SPECTATOR);
             SG.deadplayers.add(player);
@@ -265,11 +337,13 @@ public class Events implements Listener {
         }
         if(HorseRace.horseraceStarted) {
             player.setGameMode(GameMode.SPECTATOR);
-            HorseRace.finishers.add(player);
+            horseracei = horseracei + 1;
+            HorseRace.finishers.set(horseracei,player);
         }
         if(Slimekour.slimekourStarted) {
             player.setGameMode(GameMode.SPECTATOR);
-            Slimekour.finishers.add(player);
+            slimekouri = slimekouri + 1;
+            Slimekour.finishers.set(slimekouri,player);
         }
         if(GangBeasts.gangbeastsStarted) {
             player.setGameMode(GameMode.SPECTATOR);
@@ -434,6 +508,19 @@ public class Events implements Listener {
 
     }
 
+
+    @EventHandler
+    public static void onDeath(PlayerDeathEvent e) {
+        if(e.getEntity().getLocation().getY() < 0) {
+            e.getEntity().getLocation().setY(64);
+            e.getEntity().setBedSpawnLocation(e.getEntity().getLocation());
+        } else {
+            e.getEntity().setBedSpawnLocation(e.getEntity().getLocation());
+        }
+    }
+
+
+
     @EventHandler
     public static void onSit(PlayerInteractEvent e) {
         World world = e.getPlayer().getWorld();
@@ -451,38 +538,49 @@ public class Events implements Listener {
     /*
     @EventHandler
     public static void onI(PlayerInteractEvent e) {
-        if(e.getItem() == null) return;
+        if (e.getItem() == null) return;
 
-        if(e.hasBlock())
+        if (e.hasBlock())
 
-        if(e.isBlockInHand()) {
-            if(e.getItem().equals(Material.TNT)) {
-                Location loc = e.getPlayer().getLocation();
+            if (e.isBlockInHand()) {
+                if (e.getItem().equals(Material.TNT)) {
+                    Location loc = e.getPlayer().getLocation();
 
-                Entity tnt = world.spawn(loc, TNTPrimed.class);
+                    Entity tnt = world.spawn(loc, TNTPrimed.class);
 
-                ((TNTPrimed)tnt).setFuseTicks(40);
+                    ((TNTPrimed) tnt).setFuseTicks(40);
 
-                e.getItem().setAmount(0);
+                    e.getItem().setAmount(0);
+                }
             }
-        }
     }
 
+     */
+
+    /*
+    @EventHandler
+    public static void onEnterVehicle(VehicleEnterEvent e) {
+        if(e.getVehicle() instanceof Minecart) {
+            e.setCancelled(true);
+            Entity minecart = world.spawnEntity(e.getEntered().getLocation(),EntityType.MINECART);
+            minecart.addPassenger(e.getEntered());
+        }
+    }
      */
 
     @EventHandler
     public void onTNTPlace(BlockPlaceEvent e) {
         Block b = e.getBlock();
+        world = e.getPlayer().getWorld();
 
         if(b.getType().equals(Material.TNT)) {
-            Vector vec = new Vector(0.5,0.5,0.5);
+            Vector vec = new Vector(0.5,0,0.5);
             Location loc = b.getLocation().add(vec);
+            loc.getBlock().setType(Material.AIR);
 
             Entity tnt = world.spawn(loc, TNTPrimed.class);
 
             ((TNTPrimed)tnt).setFuseTicks(40);
-
-            loc.getBlock().setType(Material.AIR);
         }
     }
 

@@ -44,7 +44,7 @@ public class Event implements CommandExecutor {
                 stopTimer();
             }
             preevent = true;
-            setTimer(20);
+            setTimer(60);
             startTimer();
         }
         return true;
@@ -147,7 +147,7 @@ public class Event implements CommandExecutor {
                     spawnFireworks(firework3,3,Color.ORANGE);
                     spawnFireworks(firework4,4,Color.YELLOW);
                 }
-                if(time == 20 && preevent) {
+                if(time == 60 && preevent) {
                     world.setTime(15000);
                 }
                 time = time - 1;
@@ -179,7 +179,7 @@ public class Event implements CommandExecutor {
     public static void createBoard(Player player) {
         MCSU.manager = Bukkit.getScoreboardManager();
         MCSU.board = MCSU.manager.getNewScoreboard();
-        Objective obj = MCSU.board.registerNewObjective("MCSU","dummy","§a§lMinecraft Sundays");
+        Objective obj = MCSU.board.registerNewObjective("MCSU","dummy","§a§lMinecraft Sund..Saturdays!");
         obj.setDisplaySlot(DisplaySlot.SIDEBAR);
         Score online = obj.getScore(ChatColor.AQUA+" Online: "+ChatColor.WHITE+Bukkit.getOnlinePlayers().size());
         online.setScore(2);
