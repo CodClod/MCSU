@@ -1,3 +1,10 @@
 # MCSU
-MCSU
-joe is cool ngl
+MCSU<br>
+`ur mom`<br>
+`ur mom`<br>
+`ur mom`<br>
+`ur mom`<br>
+`ur mom`<br>
+
+gaymes:<br>
+ur mom
